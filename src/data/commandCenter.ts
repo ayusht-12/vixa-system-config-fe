@@ -1,0 +1,248 @@
+import type {
+  AnomalyEvent,
+  ApiRateSummary,
+  EngineIdentity,
+  EtcdClusterSummary,
+  HsmSummary,
+  OidcAuthSummary,
+  SystemHealthMetric,
+  TenantOverview,
+} from "../types/command-center";
+
+export const engineIdentity: EngineIdentity = {
+  instanceId: "01944f2c-7b3a-7000-8e4d-2f9a1b3c5d7e",
+  region: "us-east-1 · AZ-3",
+  availabilityZone: "AZ-3",
+  clusterRole: "PRIMARY LEADER",
+  uptime: "47d 12h 33m",
+  buildHash: "a3f9c2d",
+  buildBranch: "main",
+};
+
+export const systemHealthMetrics: SystemHealthMetric[] = [
+  {
+    id: "cpu",
+    label: "CPU",
+    value: "34",
+    unit: "%",
+    percent: 34,
+    barColor: "neon",
+    footnote: "16 cores · 3.2GHz",
+  },
+  {
+    id: "memory",
+    label: "Memory",
+    value: "61",
+    unit: "%",
+    percent: 61,
+    barColor: "info",
+    footnote: "49.2 / 80 GB",
+  },
+  {
+    id: "disk-io",
+    label: "Disk I/O",
+    value: "2.1",
+    unit: "GB/s",
+    percent: 42,
+    barColor: "purple",
+    footnote: "NVMe · 5.0 max",
+  },
+  {
+    id: "network",
+    label: "Network",
+    value: "847",
+    unit: "Mb/s",
+    percent: 85,
+    barColor: "warn",
+    footnote: "↑ 412 · ↓ 435",
+  },
+  {
+    id: "goroutines",
+    label: "Goroutines",
+    value: "4,821",
+    percent: 48,
+    barColor: "neon",
+    footnote: "max 10k · healthy",
+  },
+  {
+    id: "gc-pause",
+    label: "GC Pause",
+    value: "0.8",
+    unit: "ms",
+    percent: 8,
+    barColor: "neon",
+    footnote: "p99 · target <2ms",
+  },
+  {
+    id: "open-fds",
+    label: "Open FDs",
+    value: "12,447",
+    percent: 25,
+    barColor: "info",
+    footnote: "limit 65,536",
+  },
+];
+
+export const apiRateSummary: ApiRateSummary = {
+  currentRate: 743,
+  peakRate: 891,
+  limit: 1000,
+  throttled: 12,
+  rejected: 3,
+  latencyP99Ms: 4.2,
+  endpoints: [
+    { path: "/api/v4/events", percent: 68, color: "neon", ratePerSecond: 341 },
+    { path: "/api/v4/query", percent: 42, color: "info", ratePerSecond: 210 },
+    { path: "/api/v4/ingest", percent: 38, color: "purple", ratePerSecond: 192 },
+  ],
+};
+
+export const etcdClusterSummary: EtcdClusterSummary = {
+  raftTerm: 47,
+  commitIndex: "2.4M",
+  dbSizeGb: 4.7,
+  keyCount: "847K",
+  writeOpsPerSecond: 1247,
+  readOpsPerSecond: 8934,
+  nodes: [
+    { id: "etcd-0", address: "10.0.1.10", role: "leader", term: 47, lagMs: 0 },
+    { id: "etcd-1", address: "10.0.1.11", role: "follower", term: 47, lagMs: 2 },
+    { id: "etcd-2", address: "10.0.1.12", role: "follower", term: 47, lagMs: 3 },
+  ],
+};
+
+export const oidcAuthSummary: OidcAuthSummary = {
+  provider: "Keycloak 22.x",
+  activeTokenCount: "14,821 active",
+  authRatePerSecond: 342,
+  failureCount: 7,
+  failureRate: "0.02%",
+  jwksRefreshedMinutesAgo: 4,
+  certValidDays: 89,
+};
+
+export const hsmSummary: HsmSummary = {
+  module: "Thales Luna 7",
+  keyOpsPerSecond: 2847,
+  activeKeys: 1247,
+  activeSlots: 3,
+  totalSlots: 4,
+  algorithms: "AES-256-GCM · RSA-4096 · ECDSA P-384",
+};
+
+export const anomalyEvents: AnomalyEvent[] = [
+  {
+    id: "anomaly-1",
+    severity: "critical",
+    score: 0.97,
+    timestamp: "14:31:52",
+    message: "Unusual privilege escalation pattern detected in tenant",
+    highlight: "acme-corp",
+    meta: ["user:svc-deploy-01", "IAM::AssumeRole × 847"],
+  },
+  {
+    id: "anomaly-2",
+    severity: "critical",
+    score: 0.94,
+    timestamp: "14:30:17",
+    message: "API rate spike 3.2σ above baseline — possible DDoS vector",
+    meta: ["src:203.0.113.0/24", "endpoint:/ingest"],
+  },
+  {
+    id: "anomaly-3",
+    severity: "warning",
+    score: 0.78,
+    timestamp: "14:28:44",
+    message: "etcd write latency p99 exceeded 15ms threshold",
+    meta: ["node:etcd-1", "duration:18.3ms"],
+  },
+  {
+    id: "anomaly-4",
+    severity: "warning",
+    score: 0.71,
+    timestamp: "14:25:11",
+    message: "HSM slot utilization approaching capacity (87%)",
+    meta: ["slot:hsm-slot-3", "keys:1,087/1,248"],
+  },
+  {
+    id: "anomaly-5",
+    severity: "info",
+    score: 0.42,
+    timestamp: "14:22:03",
+    message: "New tenant provisioned — isolation boundary established",
+    meta: ["tenant:fintech-labs", "tier:enterprise"],
+  },
+];
+
+export const tenantOverview: TenantOverview = {
+  activeTenants: 24,
+  avgSla: "99.97%",
+  eventsPerHour: "4.7M",
+  degradedTenants: 2,
+  totalTenants: 24,
+  rows: [
+    {
+      id: "acme-corp",
+      name: "acme-corp",
+      tier: "enterprise",
+      eventsPerSecond: 1247,
+      apiQuotaPercent: 78,
+      sla: "99.99%",
+      status: "critical",
+    },
+    {
+      id: "fintech-labs",
+      name: "fintech-labs",
+      tier: "enterprise",
+      eventsPerSecond: 892,
+      apiQuotaPercent: 45,
+      sla: "100%",
+      status: "healthy",
+    },
+    {
+      id: "healthsys-io",
+      name: "healthsys-io",
+      tier: "premium",
+      eventsPerSecond: 634,
+      apiQuotaPercent: 91,
+      sla: "99.81%",
+      status: "warning",
+    },
+    {
+      id: "retail-nexus",
+      name: "retail-nexus",
+      tier: "premium",
+      eventsPerSecond: 421,
+      apiQuotaPercent: 52,
+      sla: "99.97%",
+      status: "healthy",
+    },
+    {
+      id: "govcloud-fed",
+      name: "govcloud-fed",
+      tier: "enterprise",
+      eventsPerSecond: 1089,
+      apiQuotaPercent: 63,
+      sla: "99.99%",
+      status: "healthy",
+    },
+    {
+      id: "startup-alpha",
+      name: "startup-alpha",
+      tier: "standard",
+      eventsPerSecond: 87,
+      apiQuotaPercent: 22,
+      sla: "100%",
+      status: "healthy",
+    },
+    {
+      id: "media-stream-x",
+      name: "media-stream-x",
+      tier: "premium",
+      eventsPerSecond: 347,
+      apiQuotaPercent: 88,
+      sla: "99.74%",
+      status: "warning",
+    },
+  ],
+};
