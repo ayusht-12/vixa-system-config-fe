@@ -421,6 +421,30 @@ export interface HsmOverviewDTO {
   attestation_history: AttestationHistoryPointDTO[];
 }
 
+export interface SecurityProviderDTO {
+  id: string;
+  name: string;
+  provider_type: string;
+  model: string;
+  manufacturer: string;
+  library_path: string | null;
+  firmware_version: string | null;
+  serial_number: string | null;
+  fips_level: string;
+  is_active: boolean;
+  status: string;
+  pool_active: number;
+  pool_max: number;
+  pool_utilization_percent: number;
+  connection_timeout_seconds: number;
+  avg_latency_ms: number;
+  session_count: number;
+  rw_session_count: number;
+  error_count_24h: number;
+  supported_mechanisms: string[];
+  last_health_check_at: string | null;
+}
+
 // --- tenancy ---
 
 export interface TenantDTO {
@@ -533,4 +557,160 @@ export interface PageDTO<T> {
   total: number;
   page: number;
   page_size: number;
+}
+
+// --- system / health ---
+
+export interface DependencyHealthDTO {
+  name: string;
+  status: string; // "up" | "down"
+  detail: string | null;
+}
+
+export interface LivenessDTO {
+  status: string; // "alive"
+}
+
+export interface ReadinessDTO {
+  status: string; // "ready" | "not_ready"
+  dependencies: DependencyHealthDTO[];
+}
+
+export interface VersionDTO {
+  name: string;
+  version: string;
+  environment: string;
+  api_prefix: string;
+}
+
+export interface DependenciesDTO {
+  status: string; // "healthy" | "degraded"
+  dependencies: DependencyHealthDTO[];
+}
+
+// --- auth: sessions & password management ---
+
+export interface SessionDTO {
+  id: string;
+  created_at: string;
+  expires_at: string;
+}
+
+export interface ForgotPasswordResponseDTO {
+  detail: string;
+  // The raw reset token is only surfaced by the backend outside production,
+  // so the reset flow is exercisable without an email transport.
+  reset_token: string | null;
+}
+
+// --- tenancy: members & usage ---
+
+export interface TenantMemberDTO {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  email: string;
+  display_name: string;
+  role: string; // owner | admin | analyst | viewer
+  created_at: string;
+}
+
+export interface TenantMemberCreateDTO {
+  user_id: string;
+  role?: string;
+}
+
+export interface TenantUsageSummaryDTO {
+  tenant_id: string;
+  slug: string;
+  display_name: string;
+  status: string;
+  member_count: number;
+  events_per_second: number;
+  provisioning_jobs_total: number;
+  active_provisioning_jobs: number;
+  schema_validations_total: number;
+  backup_snapshots_total: number;
+  current_backup_snapshots: number;
+  isolation_score: number;
+  isolation_level: string;
+}
+
+// --- compliance: controls / assessments / summary / gaps ---
+
+export interface ComplianceControlDTO {
+  id: string;
+  framework_id: string;
+  framework_code: string;
+  control_domain: string;
+  control_description: string;
+  control_code: string;
+  status: string; // mapped | partial | gap | not_applicable
+}
+
+export interface ComplianceAssessmentDTO {
+  id: string;
+  framework_id: string;
+  framework_code: string;
+  status: string; // in_progress | completed
+  started_by: string;
+  started_at: string;
+  completed_at: string | null;
+  score: number | null;
+  total_controls: number | null;
+  mapped_controls: number | null;
+  gap_controls: number | null;
+  notes: string | null;
+}
+
+export interface ComplianceAssessmentCreateDTO {
+  framework_id: string;
+}
+
+export interface FrameworkScoreDTO {
+  code: string;
+  display_name: string;
+  score: number;
+  certified: boolean;
+  open_violation_count: number;
+}
+
+export interface ComplianceSummaryDTO {
+  overall_score: number;
+  framework_count: number;
+  certified_count: number;
+  total_controls: number;
+  mapped_controls: number;
+  partial_controls: number;
+  gap_controls: number;
+  open_violation_count: number;
+  frameworks: FrameworkScoreDTO[];
+}
+
+export interface ComplianceGapDTO {
+  framework_id: string;
+  framework_code: string;
+  control_domain: string;
+  control_description: string;
+  control_code: string;
+  status: string; // gap | partial
+}
+
+export interface ScoreTrendPointDTO {
+  captured_at: string;
+  score: number;
+}
+
+export interface ScoreTrendSeriesDTO {
+  framework_id: string;
+  code: string;
+  display_name: string;
+  current_score: number;
+  delta: number;
+  points: ScoreTrendPointDTO[];
+}
+
+export interface ScoreTrendsResponseDTO {
+  window_days: number;
+  series: ScoreTrendSeriesDTO[];
 }

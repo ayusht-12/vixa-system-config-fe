@@ -7,6 +7,7 @@ import { HsmCryptoCard } from "../components/command-center/HsmCryptoCard";
 import { OidcAuthCard } from "../components/command-center/OidcAuthCard";
 import { QuickLinksFooter } from "../components/layout/QuickLinksFooter";
 import { SystemHealthGrid } from "../components/command-center/SystemHealthGrid";
+import { SystemStatusCard } from "../components/command-center/SystemStatusCard";
 import { TenantKpiTable } from "../components/command-center/TenantKpiTable";
 import { ErrorState, LoadingState } from "../components/ui/AsyncState";
 
@@ -34,6 +35,7 @@ export function CommandCenterPage() {
           <div className="flex flex-col gap-3">
             <OidcAuthCard summary={data.oidc} />
             <HsmCryptoCard summary={data.hsm} />
+            <SystemStatusCard />
           </div>
         </div>
 

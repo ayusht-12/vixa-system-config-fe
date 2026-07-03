@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { NAV_BADGES, type NavBadge } from "../../data/navStatus";
 import { useAuth } from "../../lib/auth";
-import { NAV_ITEMS } from "../../routes/routes";
+import { ACCOUNT_PATH, NAV_ITEMS } from "../../routes/routes";
 import { PulseDot } from "../ui/PulseDot";
 
 const BADGE_TEXT_CLASSES: Record<NavBadge["color"], string> = {
@@ -76,12 +76,18 @@ export function TopNav() {
           <div className="text-xs text-gray-500 hidden sm:block">
             UTC 2026-07-02 · 14:32:07
           </div>
-          <button
-            type="button"
-            className="w-7 h-7 rounded-small bg-elevated flex items-center justify-center border border-accent cursor-pointer hover:border-green-700 transition-colors"
+          <NavLink
+            to={ACCOUNT_PATH}
+            title="Account & Security"
+            className={({ isActive }) =>
+              clsx(
+                "w-7 h-7 rounded-small bg-elevated flex items-center justify-center border cursor-pointer transition-colors",
+                isActive ? "border-neon" : "border-accent hover:border-green-700",
+              )
+            }
           >
             <span className="text-xs text-gray-400">⚙</span>
-          </button>
+          </NavLink>
           <button
             type="button"
             className="w-7 h-7 rounded-small bg-elevated flex items-center justify-center border border-accent cursor-pointer"

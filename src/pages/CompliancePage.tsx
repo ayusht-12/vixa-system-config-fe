@@ -7,11 +7,14 @@ import { ControlMappingTable } from "../components/compliance/ControlMappingTabl
 import { FrameworkGrid } from "../components/compliance/FrameworkGrid";
 import { PolicyViolationPanel } from "../components/compliance/PolicyViolationPanel";
 import { SchemaValidationPanel } from "../components/compliance/SchemaValidationPanel";
+import { ComplianceAssessmentsPanel } from "../components/compliance/ComplianceAssessmentsPanel";
 import { QuickLinksFooter } from "../components/layout/QuickLinksFooter";
 import { ErrorState, LoadingState } from "../components/ui/AsyncState";
+import { useComplianceScoreTrendsViewModel } from "../api/viewModels/complianceScoreTrends";
 
 export function CompliancePage() {
   const { data, isLoading, error, refetch } = useComplianceViewModel();
+  const trends = useComplianceScoreTrendsViewModel();
 
   if (isLoading || !data) {
     return <LoadingState label="Loading compliance overview…" />;
@@ -44,7 +47,15 @@ export function CompliancePage() {
             failures={data.schemaFailures}
             schemas={[]}
           />
-          <ComplianceScoreTrends series={[]} xAxisLabels={[]} insights={[]} />
+          <ComplianceScoreTrends
+            series={trends.series}
+            xAxisLabels={trends.xAxisLabels}
+            insights={trends.insights}
+          />
+        </div>
+
+        <div className="mb-3">
+          <ComplianceAssessmentsPanel />
         </div>
 
         <QuickLinksFooter />

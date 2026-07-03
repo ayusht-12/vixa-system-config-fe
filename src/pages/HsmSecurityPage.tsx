@@ -11,24 +11,6 @@ import { Pkcs11Panel } from "../components/hsm-security/Pkcs11Panel";
 import { QuickLinksFooter } from "../components/layout/QuickLinksFooter";
 import { ErrorState, LoadingState } from "../components/ui/AsyncState";
 
-// PKCS#11 module metadata (library path, firmware, session pool, etc.) has
-// no backend source yet — real fields (serial) come from the overview,
-// everything else is an honest "not available" placeholder rather than
-// fabricated data.
-const PKCS11_PLACEHOLDER = {
-  libraryPath: "—",
-  manufacturer: "—",
-  firmware: "—",
-  serial: "—",
-  connectionPoolActive: "—",
-  connectionPoolPercent: 0,
-  latency: "—",
-  timeout: "—",
-  sessions: "—",
-  rwSessions: "—",
-  errors24h: "—",
-};
-
 export function HsmSecurityPage() {
   const { data, isLoading, error, refetch, onRunAttestation, isRunningAttestation } = useHsmSecurityViewModel();
 
@@ -48,7 +30,7 @@ export function HsmSecurityPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
-        <Pkcs11Panel module={{ ...PKCS11_PLACEHOLDER, serial: data.serial }} mechanisms={[]} />
+        <Pkcs11Panel module={data.pkcs11.module} mechanisms={data.pkcs11.mechanisms} />
         <HsmSlotMap slots={data.slots} summary={data.slotSummary} />
       </div>
 

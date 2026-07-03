@@ -7,6 +7,7 @@ import { ProvisioningPanel } from "../components/tenancy/ProvisioningPanel";
 import { SchemaValidationQueue } from "../components/tenancy/SchemaValidationQueue";
 import { TenancyKpiGrid } from "../components/tenancy/TenancyKpiGrid";
 import { TenancyPageHeader } from "../components/tenancy/TenancyPageHeader";
+import { TenantMembersPanel } from "../components/tenancy/TenantMembersPanel";
 import { QuickLinksFooter } from "../components/layout/QuickLinksFooter";
 import {
   boundaryFooterNote,
@@ -65,6 +66,12 @@ export function TenancyPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
         <SchemaValidationQueue rows={schemaRows} badgeLabel={schemaSummaryBadge} summary={schemaSummary} />
         <BackupSnapshotStatus snapshots={snapshots} badgeLabel={snapshotSummaryBadge} summary={snapshotSummary} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
+        <TenantMembersPanel
+          tenants={tenants.rows.map((row) => ({ id: row.id, label: row.tenantId }))}
+        />
       </div>
 
       <QuickLinksFooter />

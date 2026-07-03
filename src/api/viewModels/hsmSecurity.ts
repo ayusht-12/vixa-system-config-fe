@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { approveKeyCeremony, completeKeyCeremony, fetchHsmOverview, runHsmAttestation } from "../hsm";
+import {
+  approveKeyCeremony,
+  completeKeyCeremony,
+  fetchHsmOverview,
+  fetchHsmProviders,
+  runHsmAttestation,
+} from "../hsm";
 import type {
   AlgorithmEntry,
   AttestationCheck,
@@ -9,6 +15,7 @@ import type {
   HsmKpiCard,
   HsmSlot,
   MasterKeyRow,
+  PkcsMechanism,
 } from "../../types/hsm-security";
 import type { AccentColor } from "../../types/command-center";
 import type {
@@ -18,6 +25,7 @@ import type {
   HsmSlotDTO,
   KeyCeremonyDTO,
   MasterKeyDTO,
+  SecurityProviderDTO,
 } from "../types";
 
 function mapSlots(dto: HsmSlotDTO[]): HsmSlot[] {
@@ -170,9 +178,82 @@ function mapAttestation(dto: HsmOverviewDTO): {
   };
 }
 
+const MECHANISM_TONES: AccentColor[] = ["neon", "info", "purple"];
+
+interface Pkcs11ViewData {
+  module: {
+    libraryPath: string;
+    manufacturer: string;
+    firmware: string;
+    serial: string;
+    connectionPoolActive: string;
+    connectionPoolPercent: number;
+    latency: string;
+    timeout: string;
+    sessions: string;
+    rwSessions: string;
+    errors24h: string;
+  };
+  mechanisms: PkcsMechanism[];
+}
+
+function mapPkcs11(providers: SecurityProviderDTO[], fallbackSerial: string): Pkcs11ViewData {
+  // The panel shows a single representative provider: the busiest active one
+  // (the primary that is actually serving sessions), not whichever sorts first
+  // alphabetically. Falls back to the first provider, or an honest empty panel
+  // when none are configured yet.
+  const provider =
+    [...providers]
+      .filter((p) => p.is_active)
+      .sort(
+        (a, b) =>
+          b.session_count - a.session_count ||
+          b.pool_active - a.pool_active ||
+          a.name.localeCompare(b.name),
+      )[0] ?? providers[0];
+  if (!provider) {
+    return {
+      module: {
+        libraryPath: "—",
+        manufacturer: "—",
+        firmware: "—",
+        serial: fallbackSerial,
+        connectionPoolActive: "—",
+        connectionPoolPercent: 0,
+        latency: "—",
+        timeout: "—",
+        sessions: "—",
+        rwSessions: "—",
+        errors24h: "—",
+      },
+      mechanisms: [],
+    };
+  }
+  return {
+    module: {
+      libraryPath: provider.library_path ?? "—",
+      manufacturer: provider.manufacturer,
+      firmware: provider.firmware_version ?? "—",
+      serial: provider.serial_number ?? fallbackSerial,
+      connectionPoolActive: `${provider.pool_active}/${provider.pool_max} active`,
+      connectionPoolPercent: Math.round(provider.pool_utilization_percent),
+      latency: `${provider.avg_latency_ms}ms avg`,
+      timeout: `${provider.connection_timeout_seconds}s`,
+      sessions: String(provider.session_count),
+      rwSessions: String(provider.rw_session_count),
+      errors24h: String(provider.error_count_24h),
+    },
+    mechanisms: provider.supported_mechanisms.map((label, index) => ({
+      label,
+      tone: MECHANISM_TONES[index % MECHANISM_TONES.length],
+    })),
+  };
+}
+
 export function useHsmSecurityViewModel() {
   const queryClient = useQueryClient();
   const query = useQuery({ queryKey: ["hsm", "overview"], queryFn: fetchHsmOverview });
+  const providersQuery = useQuery({ queryKey: ["hsm", "providers"], queryFn: fetchHsmProviders });
 
   function invalidate() {
     queryClient.invalidateQueries({ queryKey: ["hsm", "overview"] });
@@ -188,6 +269,7 @@ export function useHsmSecurityViewModel() {
   const data = dto
     ? {
         serial: dto.module_serial,
+        pkcs11: mapPkcs11(providersQuery.data ?? [], dto.module_serial),
         slots: mapSlots(dto.slots),
         slotSummary: `${dto.slots.filter((s) => s.is_active).length}/${dto.slots.length} active`,
         masterKeys: mapMasterKeys(dto.master_keys),
@@ -274,7 +356,7 @@ export function useHsmSecurityViewModel() {
 
   return {
     data,
-    isLoading: query.isLoading,
+    isLoading: query.isLoading || providersQuery.isLoading,
     error: query.error as Error | null,
     refetch: query.refetch,
     onRunAttestation: () => attestMutation.mutate(),

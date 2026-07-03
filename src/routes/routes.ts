@@ -51,3 +51,7 @@ export const ROUTES = {
 } as const satisfies Record<string, RouteDef>;
 
 export const NAV_ITEMS: RouteDef[] = Object.values(ROUTES);
+
+// Account / security lives off the primary nav — reachable via the top-nav
+// settings affordance rather than as a main dashboard tab.
+export const ACCOUNT_PATH = "/account";

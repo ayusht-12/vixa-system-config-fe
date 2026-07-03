@@ -9,7 +9,8 @@ import { ConfigManagerPage } from "./pages/ConfigManagerPage";
 import { HsmSecurityPage } from "./pages/HsmSecurityPage";
 import { LoginPage } from "./pages/LoginPage";
 import { TenancyPage } from "./pages/TenancyPage";
-import { ROUTES } from "./routes/routes";
+import { AccountPage } from "./pages/AccountPage";
+import { ACCOUNT_PATH, ROUTES } from "./routes/routes";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path={ROUTES.auditLogs.path} element={<AuditLogPage />} />
         <Route path={ROUTES.hsmSecurity.path} element={<HsmSecurityPage />} />
         <Route path={ROUTES.tenancy.path} element={<TenancyPage />} />
+        <Route path={ACCOUNT_PATH} element={<AccountPage />} />
       </Route>
     </Routes>
   );
