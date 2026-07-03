@@ -52,7 +52,6 @@ export function useTenantManagementViewModel() {
 
   function invalidate() {
     queryClient.invalidateQueries({ queryKey: ["tenancy"] });
-    queryClient.invalidateQueries({ queryKey: ["dashboard"] });
   }
 
   const tenants = query.data?.items ?? [];

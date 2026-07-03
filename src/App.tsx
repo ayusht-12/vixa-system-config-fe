@@ -6,7 +6,6 @@ import { AuditLogPage } from "./pages/AuditLogPage";
 import { CommandCenterPage } from "./pages/CommandCenterPage";
 import { CompliancePage } from "./pages/CompliancePage";
 import { ConfigManagerPage } from "./pages/ConfigManagerPage";
-import { DashboardPage } from "./pages/DashboardPage";
 import { HsmSecurityPage } from "./pages/HsmSecurityPage";
 import { LoginPage } from "./pages/LoginPage";
 import { TenancyPage } from "./pages/TenancyPage";
@@ -24,7 +23,6 @@ function App() {
         }
       >
         <Route path={ROUTES.commandCenter.path} element={<CommandCenterPage />} />
-        <Route path={ROUTES.dashboard.path} element={<DashboardPage />} />
         <Route path={ROUTES.anomalyDetection.path} element={<AnomalyDetectionPage />} />
         <Route path={ROUTES.compliance.path} element={<CompliancePage />} />
         <Route path={ROUTES.configManager.path} element={<ConfigManagerPage />} />
