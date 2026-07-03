@@ -1,3 +1,4 @@
+import { useTenantManagementViewModel } from "../api/viewModels/tenancy";
 import { BackupSnapshotStatus } from "../components/tenancy/BackupSnapshotStatus";
 import { BreachAlertsPanel } from "../components/tenancy/BreachAlertsPanel";
 import { DataBoundaryVisualization } from "../components/tenancy/DataBoundaryVisualization";
@@ -13,8 +14,6 @@ import {
   breachAlerts,
   breachHistoryNote,
   isolationModeOptions,
-  isolationSummary,
-  isolationSummaryBadge,
   kpiCards,
   provisioningState,
   regionOptions,
@@ -25,11 +24,12 @@ import {
   snapshotSummaryBadge,
   snapshots,
   tenancyHeader,
-  tenantIsolationRows,
   tierOptions,
 } from "../data/tenancy";
 
 export function TenancyPage() {
+  const tenants = useTenantManagementViewModel();
+
   return (
     <div className="px-4 pt-4 pb-4">
       <TenancyPageHeader isolationEngineStatus={tenancyHeader.isolationEngineStatus} />
@@ -38,7 +38,16 @@ export function TenancyPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
-        <IsolationStatusTable rows={tenantIsolationRows} badgeLabel={isolationSummaryBadge} summary={isolationSummary} />
+        <IsolationStatusTable
+          rows={tenants.rows}
+          badgeLabel="LIVE · PER-ORG ENFORCEMENT"
+          summary={tenants.summary}
+          actions={{
+            onActivate: tenants.onActivate,
+            onDeactivate: tenants.onDeactivate,
+            onDelete: tenants.onDelete,
+          }}
+        />
         <BreachAlertsPanel alerts={breachAlerts} historyNote={breachHistoryNote} />
       </div>
 
@@ -48,6 +57,7 @@ export function TenancyPage() {
           tierOptions={tierOptions}
           regionOptions={regionOptions}
           isolationModeOptions={isolationModeOptions}
+          onProvision={tenants.onCreate}
         />
         <DataBoundaryVisualization tenants={boundaryTenants} footerNote={boundaryFooterNote} />
       </div>

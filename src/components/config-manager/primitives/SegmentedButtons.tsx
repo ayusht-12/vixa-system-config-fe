@@ -4,10 +4,16 @@ import clsx from "clsx";
 interface SegmentedButtonsProps {
   options: string[];
   defaultValue?: string;
+  onChange?: (value: string) => void;
 }
 
-export function SegmentedButtons({ options, defaultValue }: SegmentedButtonsProps) {
+export function SegmentedButtons({ options, defaultValue, onChange }: SegmentedButtonsProps) {
   const [active, setActive] = useState(defaultValue ?? options[0]);
+
+  function select(option: string) {
+    setActive(option);
+    onChange?.(option);
+  }
 
   return (
     <div className="flex gap-1.5 flex-wrap">
@@ -15,7 +21,7 @@ export function SegmentedButtons({ options, defaultValue }: SegmentedButtonsProp
         <button
           key={option}
           type="button"
-          onClick={() => setActive(option)}
+          onClick={() => select(option)}
           className={clsx(
             "px-3 py-1.5 rounded-small text-xs font-medium transition-colors",
             option === active

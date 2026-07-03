@@ -21,6 +21,7 @@ export function ActionButton({ action, size = "md" }: ActionButtonProps) {
     "rounded-small text-xs transition-colors",
     size === "md" ? "px-3 py-1" : "px-2 py-0.5",
     VARIANT_CLASSES[action.variant],
+    action.disabled && "opacity-40 pointer-events-none",
   );
 
   if (action.variant === "link" && action.href) {
@@ -32,7 +33,7 @@ export function ActionButton({ action, size = "md" }: ActionButtonProps) {
   }
 
   return (
-    <button type="button" className={className}>
+    <button type="button" className={className} onClick={action.onClick} disabled={action.disabled}>
       {action.label}
     </button>
   );

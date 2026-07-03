@@ -1,52 +1,96 @@
+import { useConfigManagerViewModel } from "../api/viewModels/configManager";
+import type { ConfigParameterDTO } from "../api/types";
 import { ConfigDiffSummary } from "../components/config-manager/ConfigDiffSummary";
 import { ConfigPageHeader } from "../components/config-manager/ConfigPageHeader";
 import { ConfigSectionHeader } from "../components/config-manager/ConfigSectionHeader";
 import { ConfigSummaryGrid } from "../components/config-manager/ConfigSummaryGrid";
-import { AuditSinkPanel } from "../components/config-manager/panels/AuditSinkPanel";
-import { AuthStrategyPanel } from "../components/config-manager/panels/AuthStrategyPanel";
-import { BackupIntervalsPanel } from "../components/config-manager/panels/BackupIntervalsPanel";
-import { CryptoHsmPanel } from "../components/config-manager/panels/CryptoHsmPanel";
-import { EngineIdentityPanel } from "../components/config-manager/panels/EngineIdentityPanel";
-import { EtcdPersistencePanel } from "../components/config-manager/panels/EtcdPersistencePanel";
-import { GeoRedundancyPanel } from "../components/config-manager/panels/GeoRedundancyPanel";
-import { RateLimitingPanel } from "../components/config-manager/panels/RateLimitingPanel";
-import { RedisCachePanel } from "../components/config-manager/panels/RedisCachePanel";
-import { RetentionPolicyPanel } from "../components/config-manager/panels/RetentionPolicyPanel";
-import { TenancyIsolationPanel } from "../components/config-manager/panels/TenancyIsolationPanel";
+import { DynamicConfigSection } from "../components/config-manager/DynamicConfigSection";
+import type { ConfigTier } from "../components/config-manager/primitives/tierStyles";
 import { QuickLinksFooter } from "../components/layout/QuickLinksFooter";
+import { ErrorState, LoadingState } from "../components/ui/AsyncState";
+
+const TIER_HINTS: Record<ConfigTier, string> = {
+  critical: "Engine restart may be required on change",
+  necessary: "Hot-reload supported · no restart required",
+  optional: "Feature flags · performance tuning · infrastructure",
+};
+
+function sectionsForTier(
+  sections: Record<string, ConfigParameterDTO[]>,
+  tier: ConfigTier,
+): Record<string, ConfigParameterDTO[]> {
+  const result: Record<string, ConfigParameterDTO[]> = {};
+  for (const [section, parameters] of Object.entries(sections)) {
+    const filtered = parameters.filter((p) => p.tier === tier);
+    if (filtered.length > 0) result[section] = filtered;
+  }
+  return result;
+}
 
 export function ConfigManagerPage() {
+  const { overview, isLoading, error, refetch, stageChange, revertChange, applyAll, isMutating } =
+    useConfigManagerViewModel();
+
+  if (isLoading || !overview) {
+    return <LoadingState label="Loading configuration…" />;
+  }
+
+  if (error) {
+    return <ErrorState message={error.message} onRetry={refetch} />;
+  }
+
+  const tiers: ConfigTier[] = ["critical", "necessary", "optional"];
+  const totalParams = Object.values(overview.sections).reduce((sum, params) => sum + params.length, 0);
+  const totalPending = overview.pending_changes.length;
+
+  const summaryCards = [
+    ...tiers.map((tier) => {
+      const summary = overview.tier_summary.find((t) => t.tier === tier);
+      return {
+        tier,
+        count: String(summary?.total ?? 0),
+        description: `${summary?.pending ?? 0} pending`,
+      };
+    }),
+    {
+      tier: "applied" as const,
+      count: `${totalParams - totalPending}/${totalParams}`,
+      description: `${totalPending} pending apply`,
+    },
+  ];
+
+  const diffChanges = overview.pending_changes.map((change) => ({
+    key: change.parameter_key,
+    fromValue: change.previous_value,
+    toValue: change.new_value,
+    note: change.reason ?? `staged by ${change.changed_by}`,
+  }));
+
   return (
     <div className="px-4 pt-4 pb-4">
-      <ConfigPageHeader unsavedCount={3} configVersion="v2.14.7" lastApplied="47m ago" />
+      <ConfigPageHeader
+        unsavedCount={totalPending}
+        configVersion="—"
+        lastApplied="—"
+        onApply={applyAll}
+        applyDisabled={totalPending === 0 || isMutating}
+      />
       <div className="mb-4">
-        <ConfigSummaryGrid />
+        <ConfigSummaryGrid cards={summaryCards} />
       </div>
 
-      <ConfigSectionHeader tier="critical" hint="Engine restart required on change" />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-        <EngineIdentityPanel />
-        <EtcdPersistencePanel />
-        <AuditSinkPanel />
-        <AuthStrategyPanel />
-      </div>
+      {tiers.map((tier) => (
+        <div key={tier}>
+          <ConfigSectionHeader tier={tier} hint={TIER_HINTS[tier]} />
+          <DynamicConfigSection
+            sections={sectionsForTier(overview.sections, tier)}
+            onStage={stageChange}
+            onRevert={revertChange}
+          />
+        </div>
+      ))}
 
-      <ConfigSectionHeader tier="necessary" hint="Hot-reload supported · no restart required" />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-        <CryptoHsmPanel />
-        <RateLimitingPanel />
-        <TenancyIsolationPanel />
-        <BackupIntervalsPanel />
-      </div>
-
-      <ConfigSectionHeader tier="optional" hint="Feature flags · performance tuning · infrastructure" />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4">
-        <RedisCachePanel />
-        <GeoRedundancyPanel />
-        <RetentionPolicyPanel />
-      </div>
-
-      <ConfigDiffSummary />
+      <ConfigDiffSummary changes={diffChanges} onApplyAll={applyAll} applyDisabled={totalPending === 0 || isMutating} />
 
       <QuickLinksFooter />
     </div>

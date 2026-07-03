@@ -1,6 +1,7 @@
 import { useState } from "react";
 import clsx from "clsx";
 import type { ProvisioningState } from "../../types/tenancy";
+import type { TenantCreateDTO } from "../../api/types";
 import { ConfigInput } from "../config-manager/primitives/ConfigInput";
 import { ConfigSelect } from "../config-manager/primitives/ConfigSelect";
 import { SegmentedButtons } from "../config-manager/primitives/SegmentedButtons";
@@ -11,6 +12,7 @@ interface ProvisioningPanelProps {
   tierOptions: string[];
   regionOptions: string[];
   isolationModeOptions: string[];
+  onProvision?: (payload: TenantCreateDTO) => Promise<unknown>;
 }
 
 const STEP_ICON = {
@@ -30,9 +32,38 @@ export function ProvisioningPanel({
   tierOptions,
   regionOptions,
   isolationModeOptions,
+  onProvision,
 }: ProvisioningPanelProps) {
   const [autoBackup, setAutoBackup] = useState(false);
   const [hsmBind, setHsmBind] = useState(true);
+  const [tenantSlug, setTenantSlug] = useState("");
+  const [tier, setTier] = useState(tierOptions[0]);
+  const [region, setRegion] = useState(regionOptions[0]);
+  const [isolationMode, setIsolationMode] = useState(isolationModeOptions[0] ?? "STRICT");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  async function handleProvision() {
+    if (!onProvision || !tenantSlug.trim()) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await onProvision({
+        slug: tenantSlug.trim(),
+        org_id: `ORG-${Date.now().toString(36).toUpperCase()}`,
+        display_name: tenantSlug.trim(),
+        tier: tier.toLowerCase(),
+        isolation_mode: isolationMode.toLowerCase(),
+        region,
+        db_schema_name: `schema_${tenantSlug.trim().replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`,
+      });
+      setTenantSlug("");
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Failed to provision tenant");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="lg:col-span-2 rounded-large border border-subtle bg-card">
@@ -90,21 +121,37 @@ export function ProvisioningPanel({
           <div className="space-y-2.5">
             <div>
               <label className="text-xs text-gray-600 block mb-1">Tenant ID</label>
-              <ConfigInput placeholder="e.g. my-org-prod" />
+              <ConfigInput
+                placeholder="e.g. my-org-prod"
+                value={tenantSlug}
+                onChange={(event) => setTenantSlug(event.target.value)}
+              />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-xs text-gray-600 block mb-1">Tier</label>
-                <ConfigSelect options={tierOptions} />
+                <ConfigSelect
+                  options={tierOptions}
+                  value={tier}
+                  onChange={(event) => setTier(event.target.value)}
+                />
               </div>
               <div>
                 <label className="text-xs text-gray-600 block mb-1">Region</label>
-                <ConfigSelect options={regionOptions} />
+                <ConfigSelect
+                  options={regionOptions}
+                  value={region}
+                  onChange={(event) => setRegion(event.target.value)}
+                />
               </div>
             </div>
             <div>
               <label className="text-xs text-gray-600 block mb-1">Isolation Mode</label>
-              <SegmentedButtons options={isolationModeOptions} defaultValue="STRICT" />
+              <SegmentedButtons
+                options={isolationModeOptions}
+                defaultValue="STRICT"
+                onChange={setIsolationMode}
+              />
             </div>
             <label className="flex items-center gap-2 pt-1 cursor-pointer">
               <input
@@ -124,11 +171,14 @@ export function ProvisioningPanel({
               />
               <span className="text-xs text-gray-400">Bind dedicated DEK to HSM slot</span>
             </label>
+            {submitError && <div className="text-xs text-danger">{submitError}</div>}
             <button
               type="button"
-              className="w-full px-4 py-2 rounded-small text-xs font-bold text-gray-900 bg-neon hover:opacity-90 transition-opacity mt-1"
+              disabled={!onProvision || !tenantSlug.trim() || submitting}
+              onClick={handleProvision}
+              className="w-full px-4 py-2 rounded-small text-xs font-bold text-gray-900 bg-neon hover:opacity-90 transition-opacity mt-1 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              + Provision Tenant
+              {submitting ? "Provisioning…" : "+ Provision Tenant"}
             </button>
           </div>
         </div>

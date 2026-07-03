@@ -5,6 +5,8 @@ interface HashChainVerificationPanelProps {
   stats: HashChainStat[];
   verification: { verified: string; failed: string; duration: string };
   chainSequence: string[];
+  onVerify?: () => void;
+  isVerifying?: boolean;
 }
 
 function HashStatCard({ stat }: { stat: HashChainStat }) {
@@ -31,6 +33,8 @@ export function HashChainVerificationPanel({
   stats,
   verification,
   chainSequence,
+  onVerify,
+  isVerifying,
 }: HashChainVerificationPanelProps) {
   return (
     <div className="rounded-large border bg-card border-neon/25">
@@ -53,9 +57,11 @@ export function HashChainVerificationPanel({
           <span className="text-xs text-gray-500">Merkle depth: 32</span>
           <button
             type="button"
-            className="px-3 py-1 rounded-small text-xs font-medium text-gray-400 border border-accent bg-surface hover:border-green-700 transition-colors"
+            onClick={onVerify}
+            disabled={isVerifying}
+            className="px-3 py-1 rounded-small text-xs font-medium text-gray-400 border border-accent bg-surface hover:border-green-700 transition-colors disabled:opacity-40"
           >
-            ↻ Re-verify
+            {isVerifying ? "Verifying…" : "↻ Re-verify"}
           </button>
         </div>
       </div>

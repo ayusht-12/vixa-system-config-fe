@@ -7,13 +7,6 @@ interface SummaryCard {
   description: string;
 }
 
-const CARDS: SummaryCard[] = [
-  { tier: "critical", count: "4", description: "engine.id · etcd · audit · auth" },
-  { tier: "necessary", count: "4", description: "HSM · rate limit · tenancy · backup" },
-  { tier: "optional", count: "3", description: "Redis · geo-redundancy · retention" },
-  { tier: "applied", count: "8/11", description: "3 pending apply" },
-];
-
 const GLOW_CLASSES: Record<SummaryCard["tier"], string> = {
   critical: "glow-red",
   necessary: "glow-amber",
@@ -52,10 +45,14 @@ function CardTile({ card }: { card: SummaryCard }) {
   );
 }
 
-export function ConfigSummaryGrid() {
+interface ConfigSummaryGridProps {
+  cards: SummaryCard[];
+}
+
+export function ConfigSummaryGrid({ cards }: ConfigSummaryGridProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {CARDS.map((card) => (
+      {cards.map((card) => (
         <CardTile key={card.tier} card={card} />
       ))}
     </div>

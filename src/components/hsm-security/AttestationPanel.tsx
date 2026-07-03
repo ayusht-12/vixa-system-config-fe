@@ -6,6 +6,8 @@ interface AttestationPanelProps {
   history: AttestationHistoryPoint[];
   lastRunLabel: string;
   scheduleNote: string;
+  onRunAttestation?: () => void;
+  isRunning?: boolean;
 }
 
 function CheckCard({ check }: { check: AttestationCheck }) {
@@ -22,7 +24,14 @@ function CheckCard({ check }: { check: AttestationCheck }) {
   );
 }
 
-export function AttestationPanel({ checks, history, lastRunLabel, scheduleNote }: AttestationPanelProps) {
+export function AttestationPanel({
+  checks,
+  history,
+  lastRunLabel,
+  scheduleNote,
+  onRunAttestation,
+  isRunning,
+}: AttestationPanelProps) {
   return (
     <div className="rounded-large border bg-card border-neon/25 mb-3">
       <div className="flex items-center justify-between px-4 py-3 border-b border-subtle flex-wrap gap-2">
@@ -42,8 +51,13 @@ export function AttestationPanel({ checks, history, lastRunLabel, scheduleNote }
           <button type="button" className="px-3 py-1 rounded-small text-xs text-gray-400 border border-accent bg-surface hover:border-gray-500 transition-colors">
             ↓ Download Report
           </button>
-          <button type="button" className="px-3 py-1 rounded-small text-xs font-medium text-gray-900 bg-neon hover:opacity-90 transition-opacity">
-            ↻ Run Attestation
+          <button
+            type="button"
+            onClick={onRunAttestation}
+            disabled={isRunning}
+            className="px-3 py-1 rounded-small text-xs font-medium text-gray-900 bg-neon hover:opacity-90 transition-opacity disabled:opacity-40"
+          >
+            {isRunning ? "Running…" : "↻ Run Attestation"}
           </button>
         </div>
       </div>

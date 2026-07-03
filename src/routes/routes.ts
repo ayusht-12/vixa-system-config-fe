@@ -12,6 +12,12 @@ export const ROUTES = {
     icon: "⬡",
     description: "Live engine overview",
   },
+  dashboard: {
+    path: "/dashboard",
+    label: "Dashboard",
+    icon: "📊",
+    description: "Cross-tenant overview",
+  },
   anomalyDetection: {
     path: "/anomaly-detection",
     label: "Anomaly Detection",

@@ -72,6 +72,8 @@ export interface CeremonyEntry {
   dotContent: string;
   dotPulse?: boolean;
   historical?: boolean;
+  onApprove?: () => void;
+  onComplete?: () => void;
 }
 
 export interface CertRow {

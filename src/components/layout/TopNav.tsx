@@ -1,6 +1,7 @@
 import clsx from "clsx";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { NAV_BADGES, type NavBadge } from "../../data/navStatus";
+import { useAuth } from "../../lib/auth";
 import { NAV_ITEMS } from "../../routes/routes";
 import { PulseDot } from "../ui/PulseDot";
 
@@ -14,7 +15,14 @@ const BADGE_TEXT_CLASSES: Record<NavBadge["color"], string> = {
 
 export function TopNav() {
   const location = useLocation();
+  const navigate = useNavigate();
   const badge = NAV_BADGES[location.pathname];
+  const { user, logout } = useAuth();
+
+  function handleLogout() {
+    logout();
+    navigate("/login", { replace: true });
+  }
 
   return (
     <nav className="bg-card border-b border-subtle sticky top-0 z-50">
@@ -80,14 +88,21 @@ export function TopNav() {
           >
             <span className="text-xs text-gray-400">🔔</span>
           </button>
-          <div className="flex items-center gap-2 pl-3 border-l border-subtle">
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Log out"
+            className="flex items-center gap-2 pl-3 border-l border-subtle cursor-pointer group"
+          >
             <div className="w-6 h-6 rounded-small bg-green-900 border border-green-700 flex items-center justify-center">
-              <span className="text-neon text-xs font-bold">A</span>
+              <span className="text-neon text-xs font-bold">
+                {(user?.display_name ?? user?.email ?? "?").charAt(0).toUpperCase()}
+              </span>
             </div>
-            <span className="text-xs text-gray-400 hidden sm:block">
-              admin@nexus
+            <span className="text-xs text-gray-400 group-hover:text-gray-200 hidden sm:block transition-colors">
+              {user?.email ?? ""}
             </span>
-          </div>
+          </button>
         </div>
       </div>
     </nav>

@@ -2,12 +2,16 @@ interface ConfigPageHeaderProps {
   unsavedCount: number;
   configVersion: string;
   lastApplied: string;
+  onApply?: () => void;
+  applyDisabled?: boolean;
 }
 
 export function ConfigPageHeader({
   unsavedCount,
   configVersion,
   lastApplied,
+  onApply,
+  applyDisabled,
 }: ConfigPageHeaderProps) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
@@ -40,17 +44,13 @@ export function ConfigPageHeader({
           type="button"
           className="px-3 py-1.5 rounded-small text-xs font-medium text-gray-400 border border-accent bg-surface hover:border-gray-500 transition-colors"
         >
-          ↺ Revert
-        </button>
-        <button
-          type="button"
-          className="px-3 py-1.5 rounded-small text-xs font-medium text-gray-400 border border-accent bg-surface hover:border-gray-500 transition-colors"
-        >
           ↓ Export YAML
         </button>
         <button
           type="button"
-          className="px-4 py-1.5 rounded-small text-xs font-bold text-gray-900 bg-neon hover:opacity-90 transition-opacity"
+          onClick={onApply}
+          disabled={applyDisabled}
+          className="px-4 py-1.5 rounded-small text-xs font-bold text-gray-900 bg-neon hover:opacity-90 transition-opacity disabled:opacity-40 disabled:pointer-events-none"
         >
           ▶ Apply Changes
         </button>

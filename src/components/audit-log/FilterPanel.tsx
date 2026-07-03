@@ -14,6 +14,8 @@ interface FilterPanelProps<T extends FilterChipBase> {
   items: T[];
   defaultActiveId?: string;
   renderLeading?: (item: T) => ReactNode;
+  activeId?: string;
+  onSelect?: (id: string) => void;
 }
 
 export function FilterPanel<T extends FilterChipBase>({
@@ -22,8 +24,16 @@ export function FilterPanel<T extends FilterChipBase>({
   items,
   defaultActiveId,
   renderLeading,
+  activeId: controlledActiveId,
+  onSelect,
 }: FilterPanelProps<T>) {
-  const [activeId, setActiveId] = useState(defaultActiveId ?? items[0]?.id);
+  const [internalActiveId, setInternalActiveId] = useState(defaultActiveId ?? items[0]?.id);
+  const activeId = controlledActiveId ?? internalActiveId;
+
+  function select(id: string) {
+    setInternalActiveId(id);
+    onSelect?.(id);
+  }
 
   return (
     <div className="rounded-large border border-subtle bg-card">
@@ -31,7 +41,7 @@ export function FilterPanel<T extends FilterChipBase>({
         <h3 className="font-heading font-semibold text-white text-sm">{title}</h3>
         <button
           type="button"
-          onClick={() => setActiveId(items[0]?.id)}
+          onClick={() => select(items[0]?.id)}
           className="text-xs text-neon cursor-pointer hover:underline"
         >
           {actionLabel}
@@ -44,7 +54,7 @@ export function FilterPanel<T extends FilterChipBase>({
             <button
               key={item.id}
               type="button"
-              onClick={() => setActiveId(item.id)}
+              onClick={() => select(item.id)}
               className={clsx(
                 "w-full px-3 py-2 rounded-small border text-xs flex items-center justify-between transition-colors",
                 isActive

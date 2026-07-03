@@ -26,6 +26,8 @@ export interface StreamAction {
   label: string;
   variant: "escalate" | "isolate" | "block" | "primary" | "default" | "link";
   href?: string;
+  onClick?: () => void;
+  disabled?: boolean;
 }
 
 export interface ThreatStreamEvent {

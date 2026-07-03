@@ -1,19 +1,30 @@
 import { Route, Routes } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
+import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 import { AnomalyDetectionPage } from "./pages/AnomalyDetectionPage";
 import { AuditLogPage } from "./pages/AuditLogPage";
 import { CommandCenterPage } from "./pages/CommandCenterPage";
 import { CompliancePage } from "./pages/CompliancePage";
 import { ConfigManagerPage } from "./pages/ConfigManagerPage";
+import { DashboardPage } from "./pages/DashboardPage";
 import { HsmSecurityPage } from "./pages/HsmSecurityPage";
+import { LoginPage } from "./pages/LoginPage";
 import { TenancyPage } from "./pages/TenancyPage";
 import { ROUTES } from "./routes/routes";
 
 function App() {
   return (
     <Routes>
-      <Route element={<AppLayout />}>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path={ROUTES.commandCenter.path} element={<CommandCenterPage />} />
+        <Route path={ROUTES.dashboard.path} element={<DashboardPage />} />
         <Route path={ROUTES.anomalyDetection.path} element={<AnomalyDetectionPage />} />
         <Route path={ROUTES.compliance.path} element={<CompliancePage />} />
         <Route path={ROUTES.configManager.path} element={<ConfigManagerPage />} />

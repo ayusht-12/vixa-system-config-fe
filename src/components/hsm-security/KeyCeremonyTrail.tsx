@@ -70,6 +70,28 @@ function CeremonyItem({ ceremony, isLast }: { ceremony: CeremonyEntry; isLast: b
               </div>
             </div>
           )}
+          {(ceremony.onApprove || ceremony.onComplete) && (
+            <div className="flex items-center gap-2 mt-2">
+              {ceremony.onApprove && (
+                <button
+                  type="button"
+                  onClick={ceremony.onApprove}
+                  className="px-2.5 py-1 rounded-small text-xs font-medium text-gray-900 bg-neon hover:opacity-90 transition-opacity"
+                >
+                  Approve
+                </button>
+              )}
+              {ceremony.onComplete && (
+                <button
+                  type="button"
+                  onClick={ceremony.onComplete}
+                  className="px-2.5 py-1 rounded-small text-xs font-medium text-info border border-info/25 bg-[#0A0F1A] hover:border-blue-500 transition-colors"
+                >
+                  Complete
+                </button>
+              )}
+            </div>
+          )}
           <div className="hash-text mt-1.5">{ceremony.ceremonyMeta}</div>
         </div>
       </div>

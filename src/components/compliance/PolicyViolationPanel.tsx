@@ -4,7 +4,7 @@ import { Badge } from "../ui/Badge";
 
 interface PolicyViolationPanelProps {
   violations: ViolationEntry[];
-  resolved: ResolvedViolation;
+  resolved: ResolvedViolation | null;
 }
 
 function ViolationCard({ violation }: { violation: ViolationEntry }) {
@@ -85,7 +85,7 @@ export function PolicyViolationPanel({ violations, resolved }: PolicyViolationPa
         {violations.map((violation) => (
           <ViolationCard key={violation.id} violation={violation} />
         ))}
-        <ResolvedCard resolved={resolved} />
+        {resolved && <ResolvedCard resolved={resolved} />}
       </div>
     </div>
   );

@@ -35,6 +35,10 @@ export interface TenantIsolationRow {
   statusLabel: string;
   statusTone: AccentColor;
   scoreLabel: string;
+  /** Raw tenant lifecycle status (active/provisioning/suspended/decommissioned),
+   * only present for rows backed by the live tenant API — drives which
+   * activate/deactivate/delete actions are shown. */
+  lifecycleStatus?: string;
 }
 
 export interface BreachAlert {

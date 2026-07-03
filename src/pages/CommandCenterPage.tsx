@@ -1,3 +1,4 @@
+import { useCommandCenterViewModel } from "../api/viewModels/commandCenter";
 import { AnomalyFeed } from "../components/command-center/AnomalyFeed";
 import { ApiRateMeter } from "../components/command-center/ApiRateMeter";
 import { EngineIdentityBanner } from "../components/command-center/EngineIdentityBanner";
@@ -7,37 +8,38 @@ import { OidcAuthCard } from "../components/command-center/OidcAuthCard";
 import { QuickLinksFooter } from "../components/layout/QuickLinksFooter";
 import { SystemHealthGrid } from "../components/command-center/SystemHealthGrid";
 import { TenantKpiTable } from "../components/command-center/TenantKpiTable";
-import {
-  anomalyEvents,
-  apiRateSummary,
-  engineIdentity,
-  etcdClusterSummary,
-  hsmSummary,
-  oidcAuthSummary,
-  systemHealthMetrics,
-  tenantOverview,
-} from "../data/commandCenter";
+import { ErrorState, LoadingState } from "../components/ui/AsyncState";
 
 export function CommandCenterPage() {
+  const { data, isLoading, error, refetch } = useCommandCenterViewModel();
+
+  if (isLoading || !data) {
+    return <LoadingState label="Loading command center…" />;
+  }
+
+  if (error) {
+    return <ErrorState message={error.message} onRetry={refetch} />;
+  }
+
   return (
     <>
-      <EngineIdentityBanner identity={engineIdentity} />
+      <EngineIdentityBanner identity={data.identity} />
 
       <div className="px-4 pb-4">
-        <SystemHealthGrid metrics={systemHealthMetrics} />
+        <SystemHealthGrid metrics={data.systemHealth} />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-          <ApiRateMeter summary={apiRateSummary} />
-          <EtcdClusterState summary={etcdClusterSummary} />
+          <ApiRateMeter summary={data.apiRate} />
+          <EtcdClusterState summary={data.etcdCluster} />
           <div className="flex flex-col gap-3">
-            <OidcAuthCard summary={oidcAuthSummary} />
-            <HsmCryptoCard summary={hsmSummary} />
+            <OidcAuthCard summary={data.oidc} />
+            <HsmCryptoCard summary={data.hsm} />
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-          <AnomalyFeed events={anomalyEvents} />
-          <TenantKpiTable overview={tenantOverview} />
+          <AnomalyFeed events={data.anomalyEvents} />
+          <TenantKpiTable overview={data.tenantOverview} />
         </div>
 
         <QuickLinksFooter />
