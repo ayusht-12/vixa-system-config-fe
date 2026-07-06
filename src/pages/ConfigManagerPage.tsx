@@ -4,6 +4,7 @@ import { ConfigDiffSummary } from "../components/config-manager/ConfigDiffSummar
 import { ConfigPageHeader } from "../components/config-manager/ConfigPageHeader";
 import { ConfigSectionHeader } from "../components/config-manager/ConfigSectionHeader";
 import { ConfigSummaryGrid } from "../components/config-manager/ConfigSummaryGrid";
+import { ConfigurationVersionsPanel } from "../components/config-manager/ConfigurationVersionsPanel";
 import { DynamicConfigSection } from "../components/config-manager/DynamicConfigSection";
 import type { ConfigTier } from "../components/config-manager/primitives/tierStyles";
 import { QuickLinksFooter } from "../components/layout/QuickLinksFooter";
@@ -91,6 +92,10 @@ export function ConfigManagerPage() {
       ))}
 
       <ConfigDiffSummary changes={diffChanges} onApplyAll={applyAll} applyDisabled={totalPending === 0 || isMutating} />
+
+      <div className="mt-3">
+        <ConfigurationVersionsPanel />
+      </div>
 
       <QuickLinksFooter />
     </div>

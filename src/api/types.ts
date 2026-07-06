@@ -270,6 +270,24 @@ export interface ConfigManagerOverviewDTO {
   pending_changes: ConfigChangeDTO[];
 }
 
+export interface ConfigurationDTO {
+  id: string;
+  name: string;
+  version: number;
+  status: string;
+  payload: Record<string, unknown>;
+  sensitive_keys: string[];
+  checksum: string;
+  description: string | null;
+  created_by: string;
+  activated_at: string | null;
+  archived_at: string | null;
+  deleted_at: string | null;
+  is_deleted: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // --- audit log ---
 
 export interface AuditLogEntryDTO {
