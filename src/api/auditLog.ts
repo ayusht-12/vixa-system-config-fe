@@ -6,6 +6,9 @@ export interface AuditLogEntriesQuery {
   eventType?: string;
   tenantSlug?: string;
   actor?: string;
+  search?: string;
+  fromTime?: string;
+  toTime?: string;
   page?: number;
   pageSize?: number;
 }
@@ -18,6 +21,9 @@ export function fetchAuditLogEntries(
   if (query.eventType) params.set("event_type", query.eventType);
   if (query.tenantSlug) params.set("tenant_slug", query.tenantSlug);
   if (query.actor) params.set("actor", query.actor);
+  if (query.search) params.set("search", query.search);
+  if (query.fromTime) params.set("from_time", query.fromTime);
+  if (query.toTime) params.set("to_time", query.toTime);
   params.set("page", String(query.page ?? 1));
   params.set("page_size", String(query.pageSize ?? 50));
 

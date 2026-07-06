@@ -4,28 +4,44 @@ import { ConfigSelect } from "../config-manager/primitives/ConfigSelect";
 
 interface ExportControlsPanelProps {
   scopeOptions: string[];
+  hasRows: boolean;
+  hasSelectedEntry: boolean;
+  onExportCurrentPageJson: () => void;
+  onExportCurrentPageCsv: () => void;
+  onExportSelectedJson: () => void;
+  onExportSelectedCsv: () => void;
 }
 
-export function ExportControlsPanel({ scopeOptions }: ExportControlsPanelProps) {
+export function ExportControlsPanel({
+  scopeOptions,
+  hasRows,
+  hasSelectedEntry,
+  onExportCurrentPageJson,
+  onExportCurrentPageCsv,
+  onExportSelectedJson,
+  onExportSelectedCsv,
+}: ExportControlsPanelProps) {
   const [scope, setScope] = useState(scopeOptions[0]);
+  const isSelectedScope = scope === "Selected Entry";
+  const canExport = isSelectedScope ? hasSelectedEntry : hasRows;
 
   return (
     <div className="rounded-large border border-subtle bg-card">
       <div className="flex items-center justify-between px-4 py-3 border-b border-subtle">
         <h3 className="font-heading font-semibold text-white text-sm">Export Controls</h3>
-        <span className="px-2 py-0.5 rounded-small text-[9px] text-neon border bg-[#001A0D] border-neon/25">
-          COMPLIANCE EVIDENCE
+        <span className="px-2 py-0.5 rounded-small text-[9px] text-warn border bg-[#1A1200] border-warn/25">
+          CURRENT PAGE ONLY
         </span>
       </div>
       <div className="p-4 space-y-3">
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="text-xs text-gray-600 block mb-1.5">Export Format</label>
-            <ConfigSelect options={["JSON (signed)", "CSV", "NDJSON", "Parquet"]} />
+            <ConfigSelect options={["JSON", "CSV"]} />
           </div>
           <div>
             <label className="text-xs text-gray-600 block mb-1.5">Include</label>
-            <ConfigSelect options={["Full payload + hashes", "Summary only", "Hashes only"]} />
+            <ConfigSelect options={["Visible fields + hashes", "Hashes only unavailable"]} />
           </div>
         </div>
 
@@ -53,38 +69,45 @@ export function ExportControlsPanel({ scopeOptions }: ExportControlsPanelProps) 
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
+            disabled={!canExport}
+            onClick={isSelectedScope ? onExportSelectedJson : onExportCurrentPageJson}
             className="px-3 py-2 rounded-small text-xs font-medium text-gray-400 border border-accent bg-surface hover:border-neon/40 hover:text-neon transition-colors flex items-center justify-center gap-1.5"
           >
             ↓ Export JSON
           </button>
           <button
             type="button"
+            disabled={!canExport}
+            onClick={isSelectedScope ? onExportSelectedCsv : onExportCurrentPageCsv}
             className="px-3 py-2 rounded-small text-xs font-medium text-gray-400 border border-accent bg-surface hover:border-neon/40 hover:text-neon transition-colors flex items-center justify-center gap-1.5"
           >
             ↓ Export CSV
           </button>
           <button
             type="button"
-            className="px-3 py-2 rounded-small text-xs font-medium text-gray-400 border border-accent bg-surface hover:border-neon/40 hover:text-neon transition-colors flex items-center justify-center gap-1.5"
+            disabled
+            className="px-3 py-2 rounded-small text-xs font-medium text-gray-600 border border-accent bg-surface flex items-center justify-center gap-1.5 opacity-50"
           >
-            📋 SOC2 Report
+            SOC2 Report Unavailable
           </button>
           <button
             type="button"
-            className="px-3 py-2 rounded-small text-xs font-medium text-gray-400 border border-accent bg-surface hover:border-neon/40 hover:text-neon transition-colors flex items-center justify-center gap-1.5"
+            disabled
+            className="px-3 py-2 rounded-small text-xs font-medium text-gray-600 border border-accent bg-surface flex items-center justify-center gap-1.5 opacity-50"
           >
-            📋 GDPR Report
+            GDPR Report Unavailable
           </button>
         </div>
 
         <button
           type="button"
-          className="w-full px-3 py-2 rounded-small text-xs font-bold text-gray-900 bg-neon hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+          disabled
+          className="w-full px-3 py-2 rounded-small text-xs font-bold text-gray-600 border border-accent bg-surface flex items-center justify-center gap-2 opacity-50"
         >
-          🔐 Export with Cryptographic Proof
+          Cryptographic proof bundle unavailable
         </button>
         <div className="text-xs text-gray-600 text-center">
-          Exports include Merkle proof + ECDSA-P384 signature bundle
+          Exports include only data currently loaded in this browser view.
         </div>
       </div>
     </div>

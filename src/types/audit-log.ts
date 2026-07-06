@@ -70,7 +70,7 @@ export interface LogEntry {
   chainLabel: string;
   actor: string;
   actorMeta: string;
-  integrity: "verified" | "warning" | "failed";
+  integrity: "verified" | "unverified" | "warning" | "failed";
   selected?: boolean;
 }
 
