@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import clsx from "clsx";
 import type { CertRow } from "../../types/hsm-security";
 import { ACCENT_CLASSES } from "../ui/accentColors";
@@ -44,6 +45,15 @@ function CertRowItem({ cert }: { cert: CertRow }) {
 }
 
 export function CertificateInventory({ certificates, summary }: CertificateInventoryProps) {
+  const [search, setSearch] = useState("");
+  const visibleCertificates = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return certificates;
+    return certificates.filter((cert) =>
+      [cert.cn, cert.algoLine, cert.type, cert.status].some((value) => value.toLowerCase().includes(term)),
+    );
+  }, [certificates, search]);
+
   return (
     <div className="lg:col-span-3 rounded-large border border-subtle bg-card">
       <div className="flex items-center justify-between px-4 py-3 border-b border-subtle flex-wrap gap-2">
@@ -55,10 +65,19 @@ export function CertificateInventory({ certificates, summary }: CertificateInven
         </div>
         <div className="flex items-center gap-2">
           <div className="w-44">
-            <ConfigInput placeholder="Search CN / SAN..." />
+            <ConfigInput
+              placeholder="Search loaded certs..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
           </div>
-          <button type="button" className="px-2.5 py-1 rounded-small text-xs font-medium text-gray-900 bg-neon hover:opacity-90 transition-opacity">
-            + Import
+          <button
+            type="button"
+            disabled
+            title="Certificate import is not exposed by the HSM backend."
+            className="px-2.5 py-1 rounded-small text-xs font-medium text-gray-500 bg-surface border border-accent disabled:opacity-60"
+          >
+            Import unavailable
           </button>
         </div>
       </div>
@@ -75,19 +94,29 @@ export function CertificateInventory({ certificates, summary }: CertificateInven
       </div>
 
       <div className="scrollbar-thin overflow-y-auto max-h-[280px]">
-        {certificates.map((cert) => (
+        {visibleCertificates.map((cert) => (
           <CertRowItem key={cert.id} cert={cert} />
         ))}
+        {visibleCertificates.length === 0 && (
+          <div className="px-4 py-6 text-xs text-gray-500">No loaded certificates match this search.</div>
+        )}
       </div>
 
       <div className="px-4 py-3 border-t border-subtle bg-[#0A0E14] flex items-center justify-between flex-wrap gap-2">
-        <span className="text-xs text-gray-500">{summary.showingLabel}</span>
+        <span className="text-xs text-gray-500">
+          {search ? `Showing ${visibleCertificates.length} of ${certificates.length} loaded` : summary.showingLabel}
+        </span>
         <div className="flex items-center gap-3 text-xs">
           <span className="text-gray-500">
-            Auto-renewal: <span className="text-neon">enabled</span> · threshold 30d
+            Auto-renewal shown per certificate · threshold 30d
           </span>
-          <button type="button" className="px-2.5 py-1 rounded-small text-xs text-gray-400 border border-accent bg-surface hover:border-gray-500 transition-colors">
-            View All →
+          <button
+            type="button"
+            disabled
+            title="All certificates returned by the overview are already shown."
+            className="px-2.5 py-1 rounded-small text-xs text-gray-500 border border-accent bg-surface disabled:opacity-60"
+          >
+            View all loaded
           </button>
         </div>
       </div>

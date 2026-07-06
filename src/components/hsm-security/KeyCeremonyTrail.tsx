@@ -76,18 +76,20 @@ function CeremonyItem({ ceremony, isLast }: { ceremony: CeremonyEntry; isLast: b
                 <button
                   type="button"
                   onClick={ceremony.onApprove}
+                  disabled={ceremony.isMutating}
                   className="px-2.5 py-1 rounded-small text-xs font-medium text-gray-900 bg-neon hover:opacity-90 transition-opacity"
                 >
-                  Approve
+                  {ceremony.isMutating ? "Working…" : "Approve"}
                 </button>
               )}
               {ceremony.onComplete && (
                 <button
                   type="button"
                   onClick={ceremony.onComplete}
+                  disabled={ceremony.isMutating}
                   className="px-2.5 py-1 rounded-small text-xs font-medium text-info border border-info/25 bg-[#0A0F1A] hover:border-blue-500 transition-colors"
                 >
-                  Complete
+                  {ceremony.isMutating ? "Working…" : "Complete"}
                 </button>
               )}
             </div>

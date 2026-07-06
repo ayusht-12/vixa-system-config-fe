@@ -47,7 +47,7 @@ export function Pkcs11Panel({ module, mechanisms }: Pkcs11PanelProps) {
           <h3 className="font-heading font-semibold text-white text-sm">PKCS#11 Integration</h3>
         </div>
         <span className="px-2 py-0.5 rounded-small text-[9px] text-purple-400 border bg-[#0D0A1A] border-purple-500/25">
-          v2.40 · CRYPTOKI
+          Provider telemetry
         </span>
       </div>
       <div className="p-4 space-y-3">
@@ -81,6 +81,9 @@ export function Pkcs11Panel({ module, mechanisms }: Pkcs11PanelProps) {
                 {mechanism.label}
               </span>
             ))}
+            {mechanisms.length === 0 && (
+              <span className="text-xs text-gray-600">No supported mechanisms reported.</span>
+            )}
           </div>
         </div>
 

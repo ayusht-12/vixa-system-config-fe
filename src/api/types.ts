@@ -346,6 +346,17 @@ export interface MasterKeyDTO {
   throughput_ops: number;
 }
 
+export interface MasterKeyCreateDTO {
+  key_label: string;
+  algorithm: string;
+  slot_id?: string | null;
+  rotation_policy_days?: number;
+}
+
+export interface MasterKeyRotateRequestDTO {
+  new_label?: string | null;
+}
+
 export interface CustodianApprovalDTO {
   custodian_email: string;
   approved_at: string | null;
@@ -363,6 +374,13 @@ export interface KeyCeremonyDTO {
   scheduled_at: string | null;
   completed_at: string | null;
   approvals: CustodianApprovalDTO[];
+}
+
+export interface KeyCeremonyCreateDTO {
+  master_key_id: string;
+  predecessor_key_id?: string | null;
+  required_approvals?: number;
+  scheduled_at?: string | null;
 }
 
 export interface CertificateDTO {

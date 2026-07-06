@@ -7,6 +7,8 @@ import { ProgressBar } from "../ui/ProgressBar";
 interface MasterKeyTableProps {
   keys: MasterKeyRow[];
   summary: { active: number; expiring: number; retired: number; pending: number; policyNote: string };
+  onCreateKey?: () => void;
+  onRotateNow?: () => void;
 }
 
 const ALGO_BADGE_STYLES: Record<AccentColor, string> = {
@@ -24,6 +26,7 @@ const STATUS_BADGE: Record<MasterKeyRow["status"], string> = {
   EXPIRING: "bg-[#1A1200] text-warn border-warn/25",
   RETIRED: "bg-[#1A0505] text-danger border-danger/25",
   PENDING: "bg-[#0A0F1A] text-info border-info/25",
+  DISABLED: "bg-[#1A0505] text-danger border-danger/25",
 };
 
 const ROTATION_COLOR: Record<MasterKeyRow["status"], "neon" | "warn" | "danger" | "info"> = {
@@ -31,6 +34,7 @@ const ROTATION_COLOR: Record<MasterKeyRow["status"], "neon" | "warn" | "danger" 
   EXPIRING: "warn",
   RETIRED: "danger",
   PENDING: "info",
+  DISABLED: "danger",
 };
 
 const ACTION_CLASSES: Record<MasterKeyRow["actionVariant"], string> = {
@@ -83,17 +87,29 @@ function KeyRow({ row }: { row: MasterKeyRow }) {
         <div className="flex gap-1">
           <button
             type="button"
+            onClick={row.canRotate ? row.onRotate : row.onDetails}
+            disabled={row.isMutating}
             className={clsx("px-1.5 py-0.5 rounded-small text-[9px]", ACTION_CLASSES[row.actionVariant])}
           >
-            {row.actionLabel}
+            {row.isMutating ? "…" : row.actionLabel}
           </button>
+          {row.canDisable && (
+            <button
+              type="button"
+              onClick={row.onDisable}
+              disabled={row.isMutating}
+              className="px-1.5 py-0.5 rounded-small text-[9px] text-danger border border-danger/25 bg-[#1A0505] hover:border-red-700 disabled:opacity-40"
+            >
+              Disable
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-export function MasterKeyTable({ keys, summary }: MasterKeyTableProps) {
+export function MasterKeyTable({ keys, summary, onCreateKey, onRotateNow }: MasterKeyTableProps) {
   return (
     <div className="lg:col-span-3 rounded-large border border-subtle bg-card">
       <div className="flex items-center justify-between px-4 py-3 border-b border-subtle">
@@ -104,10 +120,18 @@ export function MasterKeyTable({ keys, summary }: MasterKeyTableProps) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" className="px-2.5 py-1 rounded-small text-xs text-gray-400 border border-accent bg-surface hover:border-gray-500 transition-colors">
+          <button
+            type="button"
+            onClick={onCreateKey}
+            className="px-2.5 py-1 rounded-small text-xs text-gray-400 border border-accent bg-surface hover:border-gray-500 transition-colors"
+          >
             + New Key
           </button>
-          <button type="button" className="px-2.5 py-1 rounded-small text-xs font-medium text-gray-900 bg-neon hover:opacity-90 transition-opacity">
+          <button
+            type="button"
+            onClick={onRotateNow}
+            className="px-2.5 py-1 rounded-small text-xs font-medium text-gray-900 bg-neon hover:opacity-90 transition-opacity"
+          >
             ↻ Rotate Now
           </button>
         </div>
