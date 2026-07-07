@@ -6,6 +6,8 @@ interface ToggleSwitchProps {
   defaultOn?: boolean;
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
+  disabled?: boolean;
+  onChange?: (on: boolean) => void;
 }
 
 const TRACK_CLASSES: Record<NonNullable<ToggleSwitchProps["size"]>, string> = {
@@ -31,14 +33,25 @@ export function ToggleSwitch({
   defaultOn = true,
   size = "md",
   showLabel = true,
+  disabled = false,
+  onChange,
 }: ToggleSwitchProps) {
   const [on, setOn] = useState(defaultOn);
+
+  function toggle() {
+    setOn((prev) => {
+      const next = !prev;
+      onChange?.(next);
+      return next;
+    });
+  }
 
   return (
     <button
       type="button"
-      onClick={() => setOn((prev) => !prev)}
-      className="flex items-center gap-1.5 cursor-pointer"
+      onClick={toggle}
+      disabled={disabled}
+      className="flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
       aria-label={label}
     >
       <span

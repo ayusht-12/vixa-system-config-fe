@@ -1,49 +1,51 @@
+import { BoundInput, BoundSegmented, BoundToggle } from "../configBinding";
 import { ConfigField } from "../primitives/ConfigField";
-import { ConfigInput } from "../primitives/ConfigInput";
 import { PanelShell } from "../primitives/PanelShell";
-import { SegmentedButtons } from "../primitives/SegmentedButtons";
-import { ToggleSwitch } from "../primitives/ToggleSwitch";
 
 const ISOLATION_TOGGLES = [
-  { label: "Network Isolation", description: "Per-tenant VPC · eBPF network policies" },
-  { label: "Data Isolation", description: "Separate encryption keys per tenant" },
-  { label: "Compute Isolation", description: "CPU/memory cgroup limits per tenant" },
-  { label: "Audit Isolation", description: "Separate audit streams per tenant" },
+  { key: "tenancy.network_isolation", label: "Network Isolation", description: "Per-tenant VPC · eBPF network policies" },
+  { key: "tenancy.data_isolation", label: "Data Isolation", description: "Separate encryption keys per tenant" },
+  { key: "tenancy.compute_isolation", label: "Compute Isolation", description: "CPU/memory cgroup limits per tenant" },
+  { key: "tenancy.audit_isolation", label: "Audit Isolation", description: "Separate audit streams per tenant" },
 ];
 
-export function TenancyIsolationPanel() {
+export function TenancyIsolationPanel({ tenantCount }: { tenantCount?: number }) {
   return (
     <PanelShell
       tier="necessary"
       title="Tenancy Isolation"
-      statusBadge={{ label: "24 TENANTS", colorHex: "#00FFA3" }}
+      statusBadge={
+        tenantCount !== undefined
+          ? { label: `${tenantCount} TENANTS`, colorHex: "#00FFA3" }
+          : undefined
+      }
       actionLink={{ label: "Manage →", href: "/tenancy" }}
     >
       <ConfigField label="tenancy.isolation_model">
-        <SegmentedButtons options={["NAMESPACE", "PROCESS", "VM"]} />
+        <BoundSegmented paramKey="tenancy.isolation_model" />
       </ConfigField>
 
       <div className="space-y-2">
         {ISOLATION_TOGGLES.map((item) => (
           <div
-            key={item.label}
+            key={item.key}
             className="flex items-center justify-between p-2.5 rounded-small bg-surface"
           >
             <div>
               <div className="text-xs text-gray-300 font-medium">{item.label}</div>
               <div className="text-xs text-gray-600">{item.description}</div>
             </div>
-            <ToggleSwitch defaultOn />
+            <BoundToggle paramKey={item.key} />
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <ConfigField label="namespace_prefix">
-          <ConfigInput defaultValue="nexus-tenant-" />
+          <BoundInput paramKey="tenancy.namespace_prefix" />
         </ConfigField>
         <ConfigField label="max_tenants">
-          <ConfigInput defaultValue="100" />
+          <BoundInput paramKey="tenancy.max_tenants" />
         </ConfigField>
       </div>
     </PanelShell>

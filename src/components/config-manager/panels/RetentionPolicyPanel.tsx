@@ -1,34 +1,39 @@
 import clsx from "clsx";
+import {
+  BoundInput,
+  BoundSegmented,
+  BoundSelect,
+  BoundToggle,
+  useConfigParam,
+  useConfigParamsMap,
+} from "../configBinding";
 import { ConfigField } from "../primitives/ConfigField";
-import { ConfigInput } from "../primitives/ConfigInput";
-import { ConfigSelect } from "../primitives/ConfigSelect";
 import { PanelShell } from "../primitives/PanelShell";
-import { SegmentedButtons } from "../primitives/SegmentedButtons";
-import { ToggleSwitch } from "../primitives/ToggleSwitch";
 
-interface RetentionRow {
+interface RetentionRowDef {
+  key: string;
   label: string;
   hint?: string;
   dotHex: string;
-  value: string;
-  wasValue?: string;
-  changed?: boolean;
 }
 
-const RETENTION_ROWS: RetentionRow[] = [
-  { label: "Audit Logs", hint: "immutable", dotHex: "#FF3B3B", value: "7y", wasValue: "5y", changed: true },
-  { label: "Event Streams", dotHex: "#FBBF24", value: "90d" },
-  { label: "Metrics / Telemetry", dotHex: "#60A4FA", value: "30d" },
-  { label: "Anomaly Snapshots", dotHex: "#A78BFA", value: "180d" },
-  { label: "Temp / Debug Logs", dotHex: "#30363D", value: "7d", wasValue: "14d", changed: true },
+const RETENTION_ROWS: RetentionRowDef[] = [
+  { key: "retention.audit_logs", label: "Audit Logs", hint: "immutable", dotHex: "#FF3B3B" },
+  { key: "retention.event_streams", label: "Event Streams", dotHex: "#FBBF24" },
+  { key: "retention.metrics", label: "Metrics / Telemetry", dotHex: "#60A4FA" },
+  { key: "retention.anomaly_snapshots", label: "Anomaly Snapshots", dotHex: "#A78BFA" },
+  { key: "retention.debug_logs", label: "Temp / Debug Logs", dotHex: "#30363D" },
 ];
 
-function RetentionRowItem({ row }: { row: RetentionRow }) {
+function RetentionRow({ row }: { row: RetentionRowDef }) {
+  const param = useConfigParam(row.key);
+  const changed = Boolean(param?.has_pending_change);
+
   return (
     <div
       className={clsx(
         "p-2.5 rounded-small",
-        row.changed ? "border border-neon/20 bg-neon/5" : "bg-surface",
+        changed ? "border border-neon/20 bg-neon/5" : "bg-surface",
       )}
     >
       <div className="flex items-center justify-between mb-1.5">
@@ -37,29 +42,32 @@ function RetentionRowItem({ row }: { row: RetentionRow }) {
           <span className="text-xs text-gray-300 font-medium">{row.label}</span>
           {row.hint && <span className="text-xs text-gray-600">({row.hint})</span>}
         </div>
-        {row.changed && <span className="text-xs text-neon">CHANGED ✎</span>}
+        {changed && <span className="text-xs text-neon">CHANGED ✎</span>}
       </div>
-      {row.changed ? (
+      {changed ? (
         <div className="flex items-center gap-2">
-          <ConfigInput defaultValue={row.value} className="flex-1" />
-          <span className="text-xs text-gray-600">was: {row.wasValue}</span>
+          <BoundInput paramKey={row.key} className="flex-1" />
+          <span className="text-xs text-gray-600 whitespace-nowrap">was: {param?.active_value}</span>
         </div>
       ) : (
-        <ConfigInput defaultValue={row.value} />
+        <BoundInput paramKey={row.key} />
       )}
     </div>
   );
 }
 
 export function RetentionPolicyPanel() {
+  const byKey = useConfigParamsMap();
+  const unsaved = RETENTION_ROWS.some((row) => byKey[row.key]?.has_pending_change);
+
   return (
     <PanelShell
       tier="optional"
       title="Data Retention Policy"
-      statusBadge={{ label: "⚠ UNSAVED", colorHex: "#FBBF24" }}
+      statusBadge={unsaved ? { label: "⚠ UNSAVED", colorHex: "#FBBF24" } : undefined}
     >
       <ConfigField label="retention.policy_mode">
-        <SegmentedButtons options={["TIME_BASED", "SIZE_BASED", "HYBRID"]} />
+        <BoundSegmented paramKey="retention.policy_mode" />
       </ConfigField>
 
       <div>
@@ -68,15 +76,13 @@ export function RetentionPolicyPanel() {
         </label>
         <div className="space-y-2">
           {RETENTION_ROWS.map((row) => (
-            <RetentionRowItem key={row.label} row={row} />
+            <RetentionRow key={row.key} row={row} />
           ))}
         </div>
       </div>
 
       <ConfigField label="retention.purge_strategy">
-        <ConfigSelect
-          options={["SOFT_DELETE_THEN_PURGE", "IMMEDIATE_PURGE", "ARCHIVE_TO_COLD_STORAGE"]}
-        />
+        <BoundSelect paramKey="retention.purge_strategy" />
       </ConfigField>
 
       <div className="flex items-center justify-between p-2.5 rounded-small border bg-[#0A0F1A] border-info/30">
@@ -84,7 +90,7 @@ export function RetentionPolicyPanel() {
           <div className="text-xs text-info font-medium">GDPR Right to Erasure</div>
           <div className="text-xs text-gray-600 mt-0.5">Automated erasure on tenant request</div>
         </div>
-        <ToggleSwitch defaultOn />
+        <BoundToggle paramKey="retention.gdpr_erasure" />
       </div>
     </PanelShell>
   );

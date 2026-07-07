@@ -1,10 +1,15 @@
+import { BoundInput, BoundSegmented } from "../configBinding";
 import { ConfigField } from "../primitives/ConfigField";
-import { ConfigInput } from "../primitives/ConfigInput";
 import { PanelShell } from "../primitives/PanelShell";
-import { SegmentedButtons } from "../primitives/SegmentedButtons";
 import { StatTile } from "../../ui/StatTile";
 
-export function AuthStrategyPanel() {
+export interface OidcTelemetry {
+  provider: string;
+  activeTokens: string;
+  certValid: string;
+}
+
+export function AuthStrategyPanel({ telemetry }: { telemetry?: OidcTelemetry }) {
   return (
     <PanelShell
       tier="critical"
@@ -12,40 +17,48 @@ export function AuthStrategyPanel() {
       statusBadge={{ label: "OIDC ACTIVE", colorHex: "#60A4FA", bgHex: "#0A1525", borderHex: "#1e3a8a" }}
     >
       <ConfigField label="auth.strategy">
-        <SegmentedButtons options={["OIDC", "SAML2", "mTLS", "API_KEY"]} />
+        <BoundSegmented paramKey="auth.strategy" />
       </ConfigField>
 
       <ConfigField label="oidc.issuer_url">
-        <ConfigInput defaultValue="https://auth.nexus.internal/realms/nexus-engine" />
+        <BoundInput paramKey="oidc.issuer_url" />
       </ConfigField>
 
       <div className="grid grid-cols-2 gap-3">
         <ConfigField label="oidc.client_id">
-          <ConfigInput defaultValue="nexus-engine-v4" />
+          <BoundInput paramKey="oidc.client_id" />
         </ConfigField>
         <ConfigField label="oidc.client_secret">
-          <ConfigInput type="password" defaultValue="supersecretvalue" />
+          <BoundInput paramKey="oidc.client_secret" type="password" />
         </ConfigField>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <ConfigField label="jwks_refresh_interval">
-          <ConfigInput defaultValue="5m" />
+          <BoundInput paramKey="oidc.jwks_refresh_interval" />
         </ConfigField>
         <ConfigField label="token_cache_ttl">
-          <ConfigInput defaultValue="15m" />
+          <BoundInput paramKey="oidc.token_cache_ttl" />
         </ConfigField>
       </div>
 
       <ConfigField label="oidc.scopes">
-        <ConfigInput defaultValue="openid profile email nexus:admin nexus:read nexus:write" />
+        <BoundInput paramKey="oidc.scopes" />
       </ConfigField>
 
-      <div className="pt-2 border-t border-subtle grid grid-cols-3 gap-2 text-center">
-        <StatTile label="Provider" tone="text-info">Keycloak 22</StatTile>
-        <StatTile label="Active Tokens" tone="text-neon">14,821</StatTile>
-        <StatTile label="Cert Valid" tone="text-neon">89d</StatTile>
-      </div>
+      {telemetry && (
+        <div className="pt-2 border-t border-subtle grid grid-cols-3 gap-2 text-center">
+          <StatTile label="Provider" tone="text-info">
+            {telemetry.provider}
+          </StatTile>
+          <StatTile label="Active Tokens" tone="text-neon">
+            {telemetry.activeTokens}
+          </StatTile>
+          <StatTile label="Cert Valid" tone="text-neon">
+            {telemetry.certValid}
+          </StatTile>
+        </div>
+      )}
     </PanelShell>
   );
 }
