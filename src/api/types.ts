@@ -750,3 +750,191 @@ export interface ScoreTrendsResponseDTO {
   window_days: number;
   series: ScoreTrendSeriesDTO[];
 }
+
+// --- rbac (users / roles / permissions) ---
+
+export interface PermissionDTO {
+  id: string;
+  name: string;
+  description: string | null;
+  resource: string;
+  action: string;
+}
+
+export interface RoleSummaryDTO {
+  id: string;
+  name: string;
+}
+
+export interface RoleDTO {
+  id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+  permission_count: number;
+  user_count: number;
+  permissions: PermissionDTO[];
+  created_at: string;
+}
+
+export interface RbacUserDTO {
+  id: string;
+  email: string;
+  display_name: string;
+  is_active: boolean;
+  is_admin: boolean;
+  created_at: string;
+  roles: RoleSummaryDTO[];
+}
+
+export interface RoleAssignmentResultDTO {
+  detail: string;
+  user_id: string;
+  role_id: string;
+  roles: RoleSummaryDTO[];
+}
+
+// --- notifications & alert rules ---
+
+export interface NotificationDTO {
+  id: string;
+  severity: string; // critical | warning | info
+  category: string;
+  title: string;
+  body: string;
+  source: string;
+  link: string | null;
+  is_read: boolean;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface UnreadCountDTO {
+  unread: number;
+  total: number;
+}
+
+export interface MarkAllReadDTO {
+  detail: string;
+  marked_read: number;
+}
+
+export interface AlertRuleDTO {
+  id: string;
+  name: string;
+  description: string | null;
+  source: string;
+  condition: string;
+  threshold_severity: string;
+  channel: string; // in_app | email | slack | webhook
+  target: string;
+  is_enabled: boolean;
+  created_by: string;
+  last_triggered_at: string | null;
+  trigger_count: number;
+  created_at: string;
+}
+
+// --- operations / observability ---
+
+export interface MetricGaugeDTO {
+  metric_key: string;
+  value: number;
+  unit: string;
+  limit_value: number | null;
+  percent_of_limit: number | null;
+}
+
+export interface EndpointThroughputDTO {
+  endpoint_path: string;
+  requests_per_second: number;
+  throttled_count: number;
+  rejected_count: number;
+  latency_p99_ms: number;
+}
+
+export interface MetricsSummaryDTO {
+  captured_at: string | null;
+  gauges: MetricGaugeDTO[];
+  total_requests_per_second: number;
+  total_throttled: number;
+  total_rejected: number;
+  max_latency_p99_ms: number;
+  top_endpoints: EndpointThroughputDTO[];
+}
+
+export interface ApplicationErrorDTO {
+  id: string;
+  occurred_at: string;
+  level: string; // critical | error | warning
+  error_type: string;
+  message: string;
+  source: string;
+  request_path: string | null;
+  status_code: number | null;
+  occurrences: number;
+  resolved: boolean;
+}
+
+export interface BackgroundJobDTO {
+  id: string;
+  name: string;
+  queue: string;
+  status: string; // queued | running | succeeded | failed
+  progress_percent: number;
+  scheduled_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+  duration_ms: number | null;
+  attempts: number;
+  max_attempts: number;
+  last_error: string | null;
+  detail: string | null;
+}
+
+export interface CacheStatusDTO {
+  configured: boolean;
+  status: string;
+  backend: string;
+  detail: string;
+}
+
+export interface DbStatusDTO {
+  status: string;
+  reachable: boolean;
+  database: string;
+  pool_size: number;
+  checked_out: number;
+  overflow: number;
+  available: number;
+  latency_ms: number | null;
+  detail: string | null;
+}
+
+export interface MigrationStatusDTO {
+  current_revision: string | null;
+  head_revision: string | null;
+  is_up_to_date: boolean;
+  pending_count: number;
+  detail: string;
+}
+
+export interface EventPublisherStatusDTO {
+  status: string;
+  sink: string;
+  total_published: number;
+  last_published_at: string | null;
+  backlog: number;
+}
+
+export interface ReadinessCheckDTO {
+  name: string;
+  status: string;
+  detail: string | null;
+}
+
+export interface OperationalReadinessDTO {
+  status: string;
+  checked_at: string;
+  checks: ReadinessCheckDTO[];
+}

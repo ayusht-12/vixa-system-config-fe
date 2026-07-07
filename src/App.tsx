@@ -10,6 +10,9 @@ import { HsmSecurityPage } from "./pages/HsmSecurityPage";
 import { LoginPage } from "./pages/LoginPage";
 import { TenancyPage } from "./pages/TenancyPage";
 import { AccountPage } from "./pages/AccountPage";
+import { AccessControlPage } from "./pages/AccessControlPage";
+import { NotificationsPage } from "./pages/NotificationsPage";
+import { OperationsPage } from "./pages/OperationsPage";
 import { ACCOUNT_PATH, ROUTES } from "./routes/routes";
 
 function App() {
@@ -30,6 +33,9 @@ function App() {
         <Route path={ROUTES.auditLogs.path} element={<AuditLogPage />} />
         <Route path={ROUTES.hsmSecurity.path} element={<HsmSecurityPage />} />
         <Route path={ROUTES.tenancy.path} element={<TenancyPage />} />
+        <Route path={ROUTES.accessControl.path} element={<AccessControlPage />} />
+        <Route path={ROUTES.notifications.path} element={<NotificationsPage />} />
+        <Route path={ROUTES.operations.path} element={<OperationsPage />} />
         <Route path={ACCOUNT_PATH} element={<AccountPage />} />
       </Route>
     </Routes>

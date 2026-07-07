@@ -48,6 +48,24 @@ export const ROUTES = {
     icon: "🏗",
     description: "24 tenants active",
   },
+  accessControl: {
+    path: "/access-control",
+    label: "Access Control",
+    icon: "👥",
+    description: "Users · roles · permissions",
+  },
+  notifications: {
+    path: "/notifications",
+    label: "Notifications",
+    icon: "🔔",
+    description: "Alerts & inbox",
+  },
+  operations: {
+    path: "/operations",
+    label: "Operations",
+    icon: "📈",
+    description: "Jobs · metrics · errors",
+  },
 } as const satisfies Record<string, RouteDef>;
 
 export const NAV_ITEMS: RouteDef[] = Object.values(ROUTES);
