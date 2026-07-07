@@ -32,7 +32,7 @@ export interface HsmSlot {
   extraValue: string;
 }
 
-export type MasterKeyStatus = "ACTIVE" | "EXPIRING" | "RETIRED" | "PENDING";
+export type MasterKeyStatus = "ACTIVE" | "EXPIRING" | "RETIRED" | "PENDING" | "DISABLED";
 
 export interface MasterKeyRow {
   id: string;
@@ -51,6 +51,12 @@ export interface MasterKeyRow {
   actionVariant: "primary" | "default" | "info";
   borderHex: string;
   keyIdTone: AccentColor;
+  canRotate?: boolean;
+  canDisable?: boolean;
+  onDetails?: () => void;
+  onRotate?: () => void;
+  onDisable?: () => void;
+  isMutating?: boolean;
 }
 
 export interface CustodianApproval {
@@ -74,6 +80,7 @@ export interface CeremonyEntry {
   historical?: boolean;
   onApprove?: () => void;
   onComplete?: () => void;
+  isMutating?: boolean;
 }
 
 export interface CertRow {
@@ -126,4 +133,5 @@ export interface AttestationCheck {
 export interface AttestationHistoryPoint {
   label: string;
   heightPercent: number;
+  passed?: boolean;
 }

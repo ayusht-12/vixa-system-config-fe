@@ -7,6 +7,7 @@ interface AttestationPanelProps {
   lastRunLabel: string;
   scheduleNote: string;
   onRunAttestation?: () => void;
+  onDownloadReport?: () => void;
   isRunning?: boolean;
 }
 
@@ -14,12 +15,14 @@ function CheckCard({ check }: { check: AttestationCheck }) {
   return (
     <div className={`rounded-large border p-3 ${check.glow}`} style={{ backgroundColor: check.bgHex, borderColor: check.borderHex }}>
       <div className="flex items-center gap-1.5 mb-2">
-        <span className={`text-sm ${ACCENT_CLASSES[check.tone].text}`}>✓</span>
+        <span className={`text-sm ${ACCENT_CLASSES[check.tone].text}`}>{check.tone === "danger" ? "!" : "✓"}</span>
         <span className={`text-xs font-medium ${ACCENT_CLASSES[check.tone].text}`}>{check.label}</span>
       </div>
       <div className="text-xs text-gray-400 mb-1">{check.description}</div>
       <div className="hash-text">{check.hashLabel}</div>
-      <div className={`mt-2 text-xs font-bold ${ACCENT_CLASSES[check.tone].text}`}>PASS</div>
+      <div className={`mt-2 text-xs font-bold ${ACCENT_CLASSES[check.tone].text}`}>
+        {check.tone === "danger" ? "FAIL" : "PASS"}
+      </div>
     </div>
   );
 }
@@ -30,8 +33,13 @@ export function AttestationPanel({
   lastRunLabel,
   scheduleNote,
   onRunAttestation,
+  onDownloadReport,
   isRunning,
 }: AttestationPanelProps) {
+  const passed = history.filter((point) => point.passed).length;
+  const failed = history.length - passed;
+  const passRate = history.length > 0 ? Math.round((passed / history.length) * 100) : null;
+
   return (
     <div className="rounded-large border bg-card border-neon/25 mb-3">
       <div className="flex items-center justify-between px-4 py-3 border-b border-subtle flex-wrap gap-2">
@@ -44,12 +52,16 @@ export function AttestationPanel({
             {lastRunLabel}
           </span>
           <span className="px-2 py-0.5 rounded-small text-[9px] text-purple-400 border bg-[#0D0A1A] border-purple-500/25">
-            FIPS 140-3 L3 VERIFIED
+            Backend attestation data
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" className="px-3 py-1 rounded-small text-xs text-gray-400 border border-accent bg-surface hover:border-gray-500 transition-colors">
-            ↓ Download Report
+          <button
+            type="button"
+            onClick={onDownloadReport}
+            className="px-3 py-1 rounded-small text-xs text-gray-400 border border-accent bg-surface hover:border-gray-500 transition-colors"
+          >
+            ↓ Export Loaded Data
           </button>
           <button
             type="button"
@@ -77,28 +89,28 @@ export function AttestationPanel({
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 flex-1">
-              <div className="flex-1 flex items-end gap-1" style={{ height: 40 }}>
-                {history.map((point, index) => (
-                  <div
-                    key={index}
-                    className="flex-1 rounded-small bg-neon"
-                    style={{ height: `${point.heightPercent}%` }}
-                    title={point.label}
-                  />
+            <div className="flex-1 flex items-end gap-1" style={{ height: 40 }}>
+              {history.map((point, index) => (
+                <div
+                  key={index}
+                  className={`flex-1 rounded-small ${point.passed ? "bg-neon" : "bg-danger"}`}
+                  style={{ height: `${point.heightPercent}%` }}
+                  title={point.label}
+                />
                 ))}
               </div>
             </div>
             <div className="flex items-center gap-4 text-xs text-gray-500 flex-shrink-0">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-small bg-neon" />
-                <span>{history.length}/{history.length} PASS</span>
+                <span>{passed}/{history.length} PASS</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-small bg-danger" />
-                <span>0 FAIL</span>
+                <span>{failed} FAIL</span>
               </div>
               <div>
-                <span className="text-neon">100%</span> pass rate
+                <span className={passRate === 100 ? "text-neon" : "text-warn"}>{passRate ?? "—"}%</span> pass rate
               </div>
             </div>
           </div>

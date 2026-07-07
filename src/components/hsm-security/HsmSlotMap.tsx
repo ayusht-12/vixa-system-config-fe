@@ -6,6 +6,7 @@ import { ProgressBar } from "../ui/ProgressBar";
 interface HsmSlotMapProps {
   slots: HsmSlot[];
   summary: string;
+  onRefresh?: () => void;
 }
 
 const STYLE_CONFIG: Record<
@@ -112,7 +113,7 @@ function SlotCard({ slot }: { slot: HsmSlot }) {
   );
 }
 
-export function HsmSlotMap({ slots, summary }: HsmSlotMapProps) {
+export function HsmSlotMap({ slots, summary, onRefresh }: HsmSlotMapProps) {
   return (
     <div className="lg:col-span-3 rounded-large border border-subtle bg-card">
       <div className="flex items-center justify-between px-4 py-3 border-b border-subtle">
@@ -121,6 +122,7 @@ export function HsmSlotMap({ slots, summary }: HsmSlotMapProps) {
           <span className="text-xs text-gray-500">{summary}</span>
           <button
             type="button"
+            onClick={onRefresh}
             className="px-2.5 py-1 rounded-small text-xs text-gray-400 border border-accent bg-surface hover:border-gray-500 transition-colors"
           >
             ↻ Refresh

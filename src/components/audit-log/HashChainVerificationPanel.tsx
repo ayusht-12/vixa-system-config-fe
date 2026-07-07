@@ -3,10 +3,11 @@ import { ACCENT_CLASSES } from "../ui/accentColors";
 
 interface HashChainVerificationPanelProps {
   stats: HashChainStat[];
-  verification: { verified: string; failed: string; duration: string };
+  verification: { verified: string; failed: string; duration: string; statusLabel: string };
   chainSequence: string[];
   onVerify?: () => void;
   isVerifying?: boolean;
+  verifyError?: Error | null;
 }
 
 function HashStatCard({ stat }: { stat: HashChainStat }) {
@@ -35,26 +36,27 @@ export function HashChainVerificationPanel({
   chainSequence,
   onVerify,
   isVerifying,
+  verifyError,
 }: HashChainVerificationPanelProps) {
   return (
     <div className="rounded-large border bg-card border-neon/25">
       <div className="flex items-center justify-between px-4 py-3 border-b border-subtle flex-wrap gap-2">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="text-neon text-sm">✓</span>
+            <span className="text-warn text-sm">?</span>
             <h3 className="font-heading font-semibold text-white text-sm">
               Cryptographic Hash Chain Verification
             </h3>
           </div>
-          <span className="px-2 py-0.5 rounded-small text-[9px] text-neon border bg-[#001A0D] border-neon/25">
-            VERIFIED · 2m ago
+          <span className="px-2 py-0.5 rounded-small text-[9px] text-warn border bg-[#1A1200] border-warn/25">
+            {verification.statusLabel}
           </span>
           <span className="px-2 py-0.5 rounded-small text-[9px] text-purple-400 border border-purple-900 bg-[#1A0A2A]">
             ECDSA-P384
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Merkle depth: 32</span>
+          <span className="text-xs text-gray-500">Merkle proof: unavailable</span>
           <button
             type="button"
             onClick={onVerify}
@@ -66,6 +68,11 @@ export function HashChainVerificationPanel({
         </div>
       </div>
       <div className="p-4">
+        {verifyError && (
+          <div className="mb-3 rounded-small border border-danger/25 bg-[#1A0505] px-3 py-2 text-xs text-danger">
+            {verifyError.message}
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
           {stats.map((stat) => (
             <HashStatCard key={stat.label} stat={stat} />
@@ -102,15 +109,16 @@ export function HashChainVerificationPanel({
                 </span>
               </span>
             ))}
-            <span className="text-neon text-xs">→</span>
-            <span className="px-2 py-1 rounded-small border text-[9px] font-mono bg-[#001A0D] border-neon text-neon animate-pulse-dot">
-              LIVE ●
-            </span>
+            {chainSequence.length === 0 && (
+              <span className="px-2 py-1 rounded-small border text-[9px] font-mono bg-[#1A1200] border-warn/25 text-warn">
+                awaiting explicit verification
+              </span>
+            )}
           </div>
           <div className="flex-1" />
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span className="w-2 h-2 rounded-full bg-neon" />
-            <span className="text-xs text-neon">All 4.72M entries verified</span>
+            <span className="w-2 h-2 rounded-full bg-warn" />
+            <span className="text-xs text-warn">Summary does not run full verification</span>
           </div>
         </div>
       </div>

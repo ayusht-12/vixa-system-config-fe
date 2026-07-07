@@ -12,7 +12,21 @@ import { QuickLinksFooter } from "../components/layout/QuickLinksFooter";
 import { ErrorState, LoadingState } from "../components/ui/AsyncState";
 
 export function HsmSecurityPage() {
-  const { data, isLoading, error, refetch, onRunAttestation, isRunningAttestation } = useHsmSecurityViewModel();
+  const {
+    data,
+    isLoading,
+    error,
+    actionError,
+    refetch,
+    onRefreshSlots,
+    onRunAttestation,
+    isRunningAttestation,
+    onCreateKey,
+    onRotateNow,
+    onInitiateCeremony,
+    onExportKeysCsv,
+    onExportAttestation,
+  } = useHsmSecurityViewModel();
 
   if (isLoading || !data) {
     return <LoadingState label="Loading HSM security…" />;
@@ -24,18 +38,34 @@ export function HsmSecurityPage() {
 
   return (
     <div className="px-4 pt-4 pb-4">
-      <HsmPageHeader serial={data.serial} />
+      <HsmPageHeader
+        serial={data.serial}
+        badges={data.headerBadges}
+        onExportAttestation={onExportAttestation}
+        onExportKeysCsv={onExportKeysCsv}
+        onInitiateCeremony={onInitiateCeremony}
+      />
+      {actionError && (
+        <div className="mb-3 rounded-small border border-danger/25 bg-[#1A0505] px-3 py-2 text-xs text-danger">
+          {actionError}
+        </div>
+      )}
       <div className="mb-3">
         <HsmKpiGrid cards={data.kpiCards} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
         <Pkcs11Panel module={data.pkcs11.module} mechanisms={data.pkcs11.mechanisms} />
-        <HsmSlotMap slots={data.slots} summary={data.slotSummary} />
+        <HsmSlotMap slots={data.slots} summary={data.slotSummary} onRefresh={onRefreshSlots} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
-        <MasterKeyTable keys={data.masterKeys} summary={data.masterKeySummary} />
+        <MasterKeyTable
+          keys={data.masterKeys}
+          summary={data.masterKeySummary}
+          onCreateKey={onCreateKey}
+          onRotateNow={onRotateNow}
+        />
         <KeyCeremonyTrail ceremonies={data.ceremonies} summary={data.ceremonySummary} />
       </div>
 
@@ -50,6 +80,7 @@ export function HsmSecurityPage() {
         lastRunLabel={data.lastRunLabel}
         scheduleNote={data.attestationScheduleNote}
         onRunAttestation={onRunAttestation}
+        onDownloadReport={onExportAttestation}
         isRunning={isRunningAttestation}
       />
 

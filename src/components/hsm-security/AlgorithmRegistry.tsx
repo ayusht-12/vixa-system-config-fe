@@ -22,7 +22,7 @@ function AlgorithmCard({ algo }: { algo: AlgorithmEntry }) {
               {algo.badgeLabel}
             </span>
           </div>
-          <span className="text-xs text-danger">✗ DISABLED</span>
+        <span className="text-xs text-danger">DISABLED</span>
         </div>
         <div className="text-xs text-gray-600">{algo.note}</div>
       </div>
@@ -43,7 +43,9 @@ function AlgorithmCard({ algo }: { algo: AlgorithmEntry }) {
             {algo.badgeLabel}
           </span>
         </div>
-        <span className="text-xs text-neon">✓ ACTIVE</span>
+        <span className={algo.active ? "text-xs text-neon" : "text-xs text-gray-500"}>
+          {algo.active ? "ACTIVE" : "INACTIVE"}
+        </span>
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
         {algo.stats.map((stat) => (
@@ -65,7 +67,7 @@ export function AlgorithmRegistry({ algorithms, summary }: AlgorithmRegistryProp
       <div className="flex items-center justify-between px-4 py-3 border-b border-subtle">
         <h3 className="font-heading font-semibold text-white text-sm">Encryption Algorithm Registry</h3>
         <span className="px-2 py-0.5 rounded-small text-[9px] text-neon border bg-[#001A0D] border-neon/25">
-          NIST APPROVED
+          BACKEND REGISTRY
         </span>
       </div>
       <div className="p-4 space-y-2 scrollbar-thin overflow-y-auto max-h-[380px]">
@@ -76,7 +78,7 @@ export function AlgorithmRegistry({ algorithms, summary }: AlgorithmRegistryProp
       <div className="px-4 py-3 border-t border-subtle bg-[#0A0E14]">
         <div className="flex items-center justify-between text-xs">
           <span className="text-gray-500">{summary}</span>
-          <span className="text-neon">NIST SP 800-57 compliant</span>
+          <span className="text-neon">Derived from backend algorithm metadata</span>
         </div>
       </div>
     </div>

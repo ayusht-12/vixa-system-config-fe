@@ -7,6 +7,12 @@ interface LogTableProps {
   paginationLabel: string;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  page: number;
+  totalPages: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
+  onExportCsv: () => void;
 }
 
 const SEVERITY_BADGE_CLASSES: Record<LogSeverity, string> = {
@@ -20,6 +26,7 @@ const SEVERITY_BADGE_CLASSES: Record<LogSeverity, string> = {
 
 const INTEGRITY_CLASSES: Record<LogEntry["integrity"], string> = {
   verified: "text-neon",
+  unverified: "text-warn",
   warning: "text-warn",
   failed: "text-danger",
 };
@@ -69,7 +76,9 @@ function LogRow({
           <div className="hash-text mt-0.5">{entry.actorMeta}</div>
         </div>
         <div className="flex items-center gap-1">
-          <span className={clsx("text-xs", INTEGRITY_CLASSES[entry.integrity])}>✓</span>
+          <span className={clsx("text-xs", INTEGRITY_CLASSES[entry.integrity])}>
+            {entry.integrity === "verified" ? "✓" : entry.integrity === "failed" ? "!" : "?"}
+          </span>
           <span className={clsx("text-[9px]", INTEGRITY_CLASSES[entry.integrity])}>
             {entry.integrity === "verified" ? "VALID" : entry.integrity.toUpperCase()}
           </span>
@@ -85,7 +94,17 @@ export function LogTable({
   paginationLabel,
   selectedId,
   onSelect,
+  page,
+  totalPages,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  onExportCsv,
 }: LogTableProps) {
+  const pages = Array.from(
+    new Set([1, Math.max(1, page - 1), page, Math.min(totalPages, page + 1), totalPages]),
+  ).filter((candidate) => candidate >= 1 && candidate <= totalPages);
+
   return (
     <div className="rounded-large border border-subtle bg-card">
       <div className="flex items-center justify-between px-4 py-3 border-b border-subtle flex-wrap gap-2">
@@ -110,9 +129,11 @@ export function LogTable({
           </div>
           <button
             type="button"
+            onClick={onExportCsv}
+            disabled={entries.length === 0}
             className="px-2.5 py-1 rounded-small text-xs font-medium text-gray-400 border border-accent bg-surface hover:border-neon/40 hover:text-neon transition-colors"
           >
-            ↓ Export
+            ↓ Export Page CSV
           </button>
         </div>
       </div>
@@ -141,26 +162,60 @@ export function LogTable({
             onSelect={() => onSelect(entry.id)}
           />
         ))}
+        {entries.length === 0 && (
+          <div className="px-4 py-8 text-center text-xs text-gray-600">
+            No audit entries match the current filters.
+          </div>
+        )}
       </div>
 
       <div className="px-4 py-3 border-t border-subtle bg-[#0A0E14] flex items-center justify-between flex-wrap gap-2">
         <div className="text-xs text-gray-500">{paginationLabel}</div>
         <div className="flex items-center gap-2">
-          <button type="button" className="px-2.5 py-1 rounded-small text-xs text-gray-500 border border-accent bg-surface hover:border-gray-500 transition-colors">
+          <select
+            value={pageSize}
+            onChange={(event) => onPageSizeChange(Number(event.target.value))}
+            className="rounded-small px-2 py-1 text-xs bg-surface border border-accent text-gray-400"
+          >
+            {[10, 25, 50, 100].map((size) => (
+              <option key={size} value={size}>
+                {size}/page
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={page <= 1}
+            onClick={() => onPageChange(page - 1)}
+            className="px-2.5 py-1 rounded-small text-xs text-gray-500 border border-accent bg-surface hover:border-gray-500 transition-colors disabled:opacity-40"
+          >
             ← Prev
           </button>
-          <span className="px-2.5 py-1 rounded-small text-xs text-neon border bg-[#001A0D] border-neon/25">1</span>
-          <button type="button" className="px-2.5 py-1 rounded-small text-xs text-gray-500 border border-accent bg-surface hover:border-gray-500 transition-colors">
-            2
-          </button>
-          <button type="button" className="px-2.5 py-1 rounded-small text-xs text-gray-500 border border-accent bg-surface hover:border-gray-500 transition-colors">
-            3
-          </button>
-          <span className="text-xs text-gray-600">...</span>
-          <button type="button" className="px-2.5 py-1 rounded-small text-xs text-gray-500 border border-accent bg-surface hover:border-gray-500 transition-colors">
-            472,185
-          </button>
-          <button type="button" className="px-2.5 py-1 rounded-small text-xs text-gray-500 border border-accent bg-surface hover:border-gray-500 transition-colors">
+          {pages.map((candidate, index) => (
+            <span key={candidate} className="flex items-center gap-2">
+              {index > 0 && candidate - pages[index - 1] > 1 && (
+                <span className="text-xs text-gray-600">...</span>
+              )}
+              <button
+                type="button"
+                onClick={() => onPageChange(candidate)}
+                className={clsx(
+                  "px-2.5 py-1 rounded-small text-xs border transition-colors",
+                  candidate === page
+                    ? "text-neon bg-[#001A0D] border-neon/25"
+                    : "text-gray-500 border-accent bg-surface hover:border-gray-500",
+                )}
+              >
+                {candidate.toLocaleString()}
+              </button>
+            </span>
+          ))}
+          <button
+            type="button"
+            disabled={page >= totalPages}
+            onClick={() => onPageChange(page + 1)}
+            className="px-2.5 py-1 rounded-small text-xs text-gray-500 border border-accent bg-surface hover:border-gray-500 transition-colors disabled:opacity-40"
+          >
             Next →
           </button>
         </div>
